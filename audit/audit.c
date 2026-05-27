@@ -1,36 +1,74 @@
 /* LD_AUDIT library: dump every relocation slot the loader wrote, as JSONL.
  *
- * Why preinit + walk-the-relocs instead of la_symbind64?
+ * Hook choice: la_activity(LA_ACT_CONSISTENT), not la_preinit.
+ *
+ *   la_activity(LA_ACT_CONSISTENT) is fired by rtld itself from
+ *   _dl_audit_activity_nsid after the initial load+reloc batch is done
+ *   but before control transfers to the executable's _start. la_preinit,
+ *   in contrast, is fired from glibc's _dl_init which is in turn called
+ *   from glibc's __libc_start_main inside libc.so.6 — so it only fires
+ *   when the executable was linked against glibc's libc.
+ *
+ *   Using la_activity means the oracle ALSO works for cross-loaded
+ *   non-glibc binaries (e.g. musl, klibc) invoked via
+ *   `/lib64/ld-linux-x86-64.so.2 <binary>`: glibc rtld loads + relocates
+ *   them under audit, we dump the resulting reloc'd memory, and _exit(0)
+ *   before the foreign libc's _start ever runs. That avoids the SIGSEGV
+ *   that musl's __libc_start_main otherwise hits when handed a glibc-set
+ *   up stack/TLS.
+ *
+ * Why walk the reloc tables ourselves instead of la_symbind64?
  *
  *   glibc only calls la_symbind64 for R_*_JUMP_SLOT relocations
- *   (elf/do-rel.h:151-160). R_*_GLOB_DAT, R_*_COPY, R_*_64, etc. are bound
- *   silently. Worst case: musl-built BIND_NOW binaries produce almost no
- *   JUMP_SLOTs (only ~6 in libc.musl), so la_symbind64 would see ~0.3% of
- *   bindings. By preinit, every reloc-bound slot already holds the value
- *   the loader chose; we read those slots out of the live process. This
- *   library therefore doesn't define la_symbind64 at all.
+ *   (elf/do-rel.h:151-160). R_*_GLOB_DAT, R_*_COPY, R_*_64, R_*_RELATIVE,
+ *   R_*_IRELATIVE, R_*_RELR (when present), and the TLS family are all
+ *   bound silently. Worst case: musl-built BIND_NOW binaries produce
+ *   almost no JUMP_SLOTs (~6 in libc.musl), so la_symbind64 would see
+ *   ~0.3% of bindings. By LA_ACT_CONSISTENT, every reloc-bound slot
+ *   already holds the value the loader chose; we read those slots out of
+ *   the live process. This library therefore doesn't define la_symbind64
+ *   at all.
  *
  * Output is one JSON object per line on the stream named by
  *   AUDIT_LOG=<path>      defaults to stderr.
  *
- * Event types: "version", "objopen", "preinit", "reloc".
+ * Event types: "version", "auxv", "objopen", "search", "r_debug",
+ *              "consistent", "serinfo", "reloc".
+ *
+ *   "version"    handshake; emitted from la_version.
+ *   "auxv"       /proc/self/auxv (AT_PHDR/PHENT/PHNUM, AT_BASE, AT_ENTRY,
+ *                AT_HWCAP/HWCAP2, AT_PLATFORM, AT_EXECFN, AT_SECURE,
+ *                AT_RANDOM 16-byte canary seed, ...) — the loader's INPUT.
+ *   "objopen"    one per DSO at first mapping; carries lmid and load base.
+ *   "search"     one per probe glibc makes when resolving a SONAME (every
+ *                directory tried, with LA_SER_* origin classification).
+ *   "r_debug"    snapshot of the official rtld<->debugger struct
+ *                (r_version, r_state, r_brk, r_ldbase) at CONSISTENT.
+ *   "consistent" marker that the post-load+reloc batch is complete.
+ *   "serinfo"    per-DSO RTLD_DI_SERINFO: the search path glibc would use
+ *                for THIS DSO's dependents (static prediction; pairs with
+ *                "search" runtime observation).
+ *   "reloc"      one per slot the loader wrote; see below.
  *
  * Every observed value is decoded to
  *   "owner": { "dso": "<path>", "off": "0x..." }
- * by intersecting with /proc/self/maps captured at preinit time. This
- * (dso, off) form is ASLR-invariant — diff it against the static loader
- * prediction directly. The raw 8-byte word read out of the slot is also
- * emitted under "value" for forensic / live-debug correlation, but its
- * absolute address varies across runs.
+ * by intersecting with /proc/self/maps captured at LA_ACT_CONSISTENT
+ * time. This (dso, off) form is ASLR-invariant — diff it against the
+ * static loader prediction directly. The raw 8-byte word read out of the
+ * slot is also emitted under "value" for forensic / live-debug
+ * correlation, but its absolute address varies across runs.
  */
 
 #define _GNU_SOURCE
+#include <dlfcn.h>
 #include <elf.h>
 #include <link.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/auxv.h>
+#include <unistd.h>
 
 static FILE *log_fp;
 
@@ -38,7 +76,7 @@ static FILE *log_fp;
 static struct link_map *saved_maps[MAX_MAPS];
 static int n_maps;
 
-/* /proc/self/maps snapshot, captured at preinit. */
+/* /proc/self/maps snapshot, captured at LA_ACT_CONSISTENT. */
 #define MAX_PROCMAPS 4096
 #define PATH_POOL_SZ (1 << 20)
 struct procmap { uint64_t start, end; const char *path; };
@@ -192,6 +230,171 @@ emit_owner(FILE *fp, uint64_t addr)
     } else {
         fputs("null", fp);
     }
+}
+
+/* --- auxv / r_debug / objsearch / serinfo -------------------------------- */
+
+/* /proc/self/auxv: the kernel-supplied input vector. This is the rtld's
+ * *input*; without it the loader's behaviour is underdetermined. Captured
+ * once at la_version time, before glibc touches anything. */
+static const char *
+auxv_type_name(uint64_t t)
+{
+    switch (t) {
+    case AT_NULL:           return "AT_NULL";
+    case AT_IGNORE:         return "AT_IGNORE";
+    case AT_EXECFD:         return "AT_EXECFD";
+    case AT_PHDR:           return "AT_PHDR";
+    case AT_PHENT:          return "AT_PHENT";
+    case AT_PHNUM:          return "AT_PHNUM";
+    case AT_PAGESZ:         return "AT_PAGESZ";
+    case AT_BASE:           return "AT_BASE";
+    case AT_FLAGS:          return "AT_FLAGS";
+    case AT_ENTRY:          return "AT_ENTRY";
+    case AT_NOTELF:         return "AT_NOTELF";
+    case AT_UID:            return "AT_UID";
+    case AT_EUID:           return "AT_EUID";
+    case AT_GID:            return "AT_GID";
+    case AT_EGID:           return "AT_EGID";
+    case AT_PLATFORM:       return "AT_PLATFORM";
+    case AT_HWCAP:          return "AT_HWCAP";
+    case AT_CLKTCK:         return "AT_CLKTCK";
+    case AT_SECURE:         return "AT_SECURE";
+    case AT_BASE_PLATFORM:  return "AT_BASE_PLATFORM";
+    case AT_RANDOM:         return "AT_RANDOM";
+    case AT_HWCAP2:         return "AT_HWCAP2";
+    case AT_RSEQ_FEATURE_SIZE: return "AT_RSEQ_FEATURE_SIZE";
+    case AT_RSEQ_ALIGN:     return "AT_RSEQ_ALIGN";
+    case AT_EXECFN:         return "AT_EXECFN";
+#ifdef AT_SYSINFO
+    case AT_SYSINFO:        return "AT_SYSINFO";
+#endif
+    case AT_SYSINFO_EHDR:   return "AT_SYSINFO_EHDR";
+    case AT_MINSIGSTKSZ:    return "AT_MINSIGSTKSZ";
+    default:                return "AT_UNKNOWN";
+    }
+}
+
+static void
+emit_auxv(void)
+{
+    FILE *f = fopen("/proc/self/auxv", "rb");
+    if (!f) return;
+    fputs("{\"event\":\"auxv\",\"entries\":[", log_fp);
+    int n = 0;
+    Elf64_auxv_t e;
+    while (fread(&e, sizeof e, 1, f) == 1) {
+        if (e.a_type == AT_NULL) break;
+        if (n++) fputc(',', log_fp);
+        fputs("{\"type\":", log_fp);
+        jstr(log_fp, auxv_type_name(e.a_type));
+        fprintf(log_fp, ",\"raw\":%lu", (unsigned long)e.a_type);
+        if (e.a_type == AT_PLATFORM || e.a_type == AT_BASE_PLATFORM
+            || e.a_type == AT_EXECFN) {
+            const char *s = (const char *)(uintptr_t)e.a_un.a_val;
+            fputs(",\"str\":", log_fp);
+            if (s) jstr(log_fp, s); else fputs("null", log_fp);
+        } else if (e.a_type == AT_RANDOM) {
+            const unsigned char *p =
+                (const unsigned char *)(uintptr_t)e.a_un.a_val;
+            fputs(",\"bytes\":\"", log_fp);
+            if (p) for (int i = 0; i < 16; i++) fprintf(log_fp, "%02x", p[i]);
+            fputs("\"", log_fp);
+        } else {
+            fprintf(log_fp, ",\"value\":\"0x%lx\"",
+                    (unsigned long)e.a_un.a_val);
+        }
+        fputc('}', log_fp);
+    }
+    fputs("]}\n", log_fp);
+    fclose(f);
+}
+
+/* The official rtld <-> debugger contract. Captured at LA_ACT_CONSISTENT.
+ *
+ * Note: glibc's _dl_audit_activity_nsid fires la_activity BEFORE
+ * _dl_debug_change_state flips r_state to RT_CONSISTENT, so at our
+ * CONSISTENT hook _r_debug.r_state still reads RT_ADD. This is honest
+ * reporting of glibc's audit-vs-debug ordering, not a stale read. */
+static const char *
+r_state_name(int s)
+{
+    switch (s) {
+    case RT_CONSISTENT: return "RT_CONSISTENT";
+    case RT_ADD:        return "RT_ADD";
+    case RT_DELETE:     return "RT_DELETE";
+    default:            return "RT_UNKNOWN";
+    }
+}
+
+static void
+emit_rdebug(void)
+{
+    fprintf(log_fp,
+            "{\"event\":\"r_debug\",\"r_version\":%d,\"r_state\":\"%s\","
+            "\"r_brk\":\"0x%lx\",\"r_ldbase\":\"0x%lx\"}\n",
+            _r_debug.r_version, r_state_name(_r_debug.r_state),
+            (unsigned long)_r_debug.r_brk,
+            (unsigned long)_r_debug.r_ldbase);
+}
+
+/* LA_SER_* flag bits. Decoded into a `|`-joined name string in JSON; raw
+ * value also emitted for forensic clarity. Default system paths come back
+ * with flags=0 (glibc only tags LA_SER_RUNPATH / LIBPATH / CONFIG when
+ * they apply); we represent that as "LA_SER_NONE". */
+static void
+serpath_flag_emit(FILE *fp, unsigned int f)
+{
+    fprintf(fp, "\"flag_raw\":%u,\"flag\":\"", f);
+    if (f == 0) { fputs("LA_SER_NONE\"", fp); return; }
+    int first = 1;
+    if (f & LA_SER_ORIG)    { fputs(first?"LA_SER_ORIG":"|LA_SER_ORIG", fp); first=0; }
+    if (f & LA_SER_LIBPATH) { fputs(first?"LA_SER_LIBPATH":"|LA_SER_LIBPATH", fp); first=0; }
+    if (f & LA_SER_RUNPATH) { fputs(first?"LA_SER_RUNPATH":"|LA_SER_RUNPATH", fp); first=0; }
+    if (f & LA_SER_CONFIG)  { fputs(first?"LA_SER_CONFIG":"|LA_SER_CONFIG", fp); first=0; }
+    if (f & LA_SER_DEFAULT) { fputs(first?"LA_SER_DEFAULT":"|LA_SER_DEFAULT", fp); first=0; }
+    if (f & LA_SER_SECURE)  { fputs(first?"LA_SER_SECURE":"|LA_SER_SECURE", fp); first=0; }
+    unsigned int known = LA_SER_ORIG|LA_SER_LIBPATH|LA_SER_RUNPATH
+                        |LA_SER_CONFIG|LA_SER_DEFAULT|LA_SER_SECURE;
+    if (f & ~known)
+        fprintf(fp, first?"LA_SER_OTHER":"|LA_SER_OTHER");
+    fputc('"', fp);
+}
+
+/* Per-DSO search-path prediction via dlinfo(RTLD_DI_SERINFO). Pairs with
+ * the la_objsearch runtime trace: serinfo says "where I would look",
+ * objsearch says "where I actually looked, in order, and which probe won". */
+static void
+emit_serinfo(struct link_map *map)
+{
+    void *handle = (void *)map;
+    Dl_serinfo size_only;
+    if (dlinfo(handle, RTLD_DI_SERINFOSIZE, &size_only) != 0) return;
+    if (size_only.dls_size == 0 || size_only.dls_cnt == 0) return;
+    Dl_serinfo *si = malloc(size_only.dls_size);
+    if (!si) return;
+    si->dls_size = size_only.dls_size;
+    si->dls_cnt  = size_only.dls_cnt;
+    if (dlinfo(handle, RTLD_DI_SERINFOSIZE, si) != 0
+        || dlinfo(handle, RTLD_DI_SERINFO, si) != 0) {
+        free(si);
+        return;
+    }
+    const char *n = (map->l_name && *map->l_name) ? map->l_name : "<main>";
+    fputs("{\"event\":\"serinfo\",\"dso\":", log_fp);
+    jstr(log_fp, n);
+    fputs(",\"paths\":[", log_fp);
+    for (unsigned int i = 0; i < si->dls_cnt; i++) {
+        if (i) fputc(',', log_fp);
+        fputs("{\"dir\":", log_fp);
+        jstr(log_fp, si->dls_serpath[i].dls_name ?
+                     si->dls_serpath[i].dls_name : "");
+        fputc(',', log_fp);
+        serpath_flag_emit(log_fp, si->dls_serpath[i].dls_flags);
+        fputc('}', log_fp);
+    }
+    fputs("]}\n", log_fp);
+    free(si);
 }
 
 /* --- emission ------------------------------------------------------------- */
@@ -400,6 +603,7 @@ la_version(unsigned int v)
     fprintf(log_fp,
             "{\"event\":\"version\",\"requested\":%u,\"got\":%u}\n",
             v, LAV_CURRENT);
+    emit_auxv();
     return LAV_CURRENT;
 }
 
@@ -411,13 +615,43 @@ la_objopen(struct link_map *map, Lmid_t lmid, uintptr_t *cookie)
     return 0;
 }
 
-void
-la_preinit(uintptr_t *cookie)
+/* Fires once per probe glibc makes when resolving a SONAME (l-strings in
+ * DT_NEEDED, dlopen names, etc). `flag` classifies the probe's origin
+ * (LA_SER_ORIG = as-requested, LA_SER_LIBPATH = LD_LIBRARY_PATH,
+ * LA_SER_RUNPATH = DT_RPATH/RUNPATH, LA_SER_CONFIG = /etc/ld.so.cache,
+ * LA_SER_DEFAULT = built-in default). Returning `name` unchanged passes
+ * the probe through to the loader unmodified. */
+char *
+la_objsearch(const char *name, uintptr_t *cookie, unsigned int flag)
 {
+    fputs("{\"event\":\"search\",\"name\":", log_fp);
+    jstr(log_fp, name ? name : "");
+    fputc(',', log_fp);
+    serpath_flag_emit(log_fp, flag);
+    fputs("}\n", log_fp);
+    return (char *)name;
+}
+
+void
+la_activity(uintptr_t *cookie, unsigned int action)
+{
+    /* LA_ACT_ADD (1)        — rtld is about to add objects to the namespace.
+     * LA_ACT_CONSISTENT (0) — the namespace is now consistent: all loads and
+     *                         all relocations are done. We dump here and
+     *                         _exit(0) before any user code (incl. foreign
+     *                         libc's __libc_start_main) runs.
+     * LA_ACT_DELETE (2)     — never reached because we _exit first. */
+    static int saw_add = 0;
+    if (action == LA_ACT_ADD) { saw_add = 1; return; }
+    if (action != LA_ACT_CONSISTENT || !saw_add) return;
+
     load_procmaps();
+    emit_rdebug();
     fprintf(log_fp,
-            "{\"event\":\"preinit\",\"n_objects\":%d,\"n_mappings\":%d}\n",
+            "{\"event\":\"consistent\",\"n_objects\":%d,\"n_mappings\":%d}\n",
             n_maps, g_npm);
+    for (int i = 0; i < n_maps; i++) emit_serinfo(saved_maps[i]);
     for (int i = 0; i < n_maps; i++) dump_relocs(saved_maps[i]);
     fflush(log_fp);
+    _exit(0);
 }
