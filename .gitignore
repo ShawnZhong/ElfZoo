@@ -3,9 +3,13 @@ corpus/mirror/
 corpus/unpacked/
 corpus/analysis/
 corpus/sysroots/
+corpus/audit/
+corpus/elflint/
 corpus/*.sqlite
 corpus/*.sqlite-*
 corpus/survey.json
+corpus/elflint_summary.json
+corpus/dep_graph.json
 
 # Test artifacts
 results/
