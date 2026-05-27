@@ -1,6 +1,8 @@
 # Bulk data — never committed
 corpus/mirror/
 corpus/unpacked/
+corpus/analysis/
+corpus/sysroots/
 corpus/*.sqlite
 corpus/*.sqlite-*
 
@@ -19,3 +21,4 @@ venv/
 .idea/
 *.swp
 .DS_Store
+*.so
