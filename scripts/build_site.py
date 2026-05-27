@@ -7,16 +7,19 @@ Reads:
   corpus/dep_graph.json         -- DT_NEEDED graph analysis (optional)
 
 Writes:
-  site/index.html               -- dashboard
-  site/{header,program,dynamic,relocations,symbols,notes,
+  docs/index.html               -- dashboard
+  docs/{header,program,dynamic,relocations,symbols,notes,
         hardening,categories,anomalies,elflint,packages,needed,
         depgraph}.html
-  site/style.css                -- minimal styling
-  site/data.json                -- raw combined data (for drill-downs)
+  docs/style.css                -- minimal styling
+  docs/data.json                -- raw combined data (for drill-downs)
 
 The site is plain HTML + a tiny vanilla-JS Chart.js setup. No build
-step needed; open `site/index.html` in a browser or serve with
+step needed; open `docs/index.html` in a browser or serve with
 `python -m http.server`.
+
+The output dir is named `docs/` so GitHub Pages can serve it
+directly from the `main` branch with no extra config.
 """
 
 from __future__ import annotations
@@ -30,7 +33,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SURVEY = ROOT / "corpus" / "survey.json"
 ELFLINT = ROOT / "corpus" / "elflint_summary.json"
 DEPGRAPH = ROOT / "corpus" / "dep_graph.json"
-SITE = ROOT / "site"
+SITE = ROOT / "docs"
 
 CHART_CDN = (
     '<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/'

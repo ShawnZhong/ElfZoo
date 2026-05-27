@@ -31,7 +31,7 @@ ElfZoo/
 ├── scripts/                   # all tooling (bash + python)
 ├── audit/                    # audit.c LD_AUDIT library
 ├── third_party/elfutils/     # vendored elfutils source (submodule, ref oracle)
-└── site/                     # generated static HTML site (committed)
+└── docs/                     # generated static HTML site (committed; served by GitHub Pages)
 ```
 
 ## Corpus
@@ -79,9 +79,9 @@ scripts/dep_graph.py --jobs 40
 # 6. Runtime LD_AUDIT traces (~5 min for repo=main; ~80 GB of JSONL)
 scripts/audit_run.py --all --repo main --jobs 40
 
-# 7. Build the static analysis website
+# 7. Build the static analysis website (output: docs/)
 scripts/build_site.py
-python3 -m http.server --directory site 8000
+python3 -m http.server --directory docs 8000
 ```
 
 Sample-file lists shown in the survey and on the site are
