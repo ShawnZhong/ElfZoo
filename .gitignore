@@ -1,0 +1,21 @@
+# Bulk data — never committed
+corpus/mirror/
+corpus/unpacked/
+corpus/*.sqlite
+corpus/*.sqlite-*
+
+# Test artifacts
+results/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
