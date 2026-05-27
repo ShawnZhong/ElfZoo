@@ -33,18 +33,31 @@ from pathlib import Path
 # Per-section flags that produce valid JSON in llvm-readobj-20.
 # See README — `--all` is broken (mixes JSON and text); these can be
 # combined in one invocation and the result is well-formed JSON.
+#
+# Scope: this dump is for a *loader* differential test, so we only ask
+# for what the loader actually consumes.
+#   --file-header / --program-headers : segments, e_entry, e_type
+#   --dynamic-table                   : DT_NEEDED / DT_REL* / DT_BIND_NOW / …
+#   --relocations / --dyn-symbols     : rela.{dyn,plt} + .dynsym
+#   --version-info                    : symbol-version resolution
+#   --notes                           : GNU_PROPERTY (BTI/IBT/SHSTK)
+# Deliberately NOT requested:
+#   --symbols           : .symtab is link-time only, never read by ld.so,
+#                         and dominates -dbg packages (2.4 MB+ per file).
+#   --needed-libs       : strictly redundant with the DT_NEEDED rows of
+#                         --dynamic-table (same string, same source).
+#   --section-headers   : the loader runs on segments; reloc-section
+#                         identification under --relocations carries the
+#                         SectionIndex either way.
 READOBJ_FLAGS = [
     "--elf-output-style=JSON",
     "--file-header",
     "--program-headers",
-    "--section-headers",
     "--dynamic-table",
     "--relocations",
     "--dyn-symbols",
-    "--symbols",
     "--notes",
     "--version-info",
-    "--needed-libs",
 ]
 
 ELF_MAGIC = b"\x7fELF"
