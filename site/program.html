@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Program Headers — ElfZoo corpus</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<header>
+  <h1><a href="index.html">ElfZoo</a> — Program Headers</h1>
+  <nav><a class="" href="index.html">Dashboard</a> · <a class="" href="categories.html">Categories</a> · <a class="" href="header.html">ELF Header</a> · <a class="active" href="program.html">Program Headers</a> · <a class="" href="dynamic.html">Dynamic</a> · <a class="" href="relocations.html">Relocations</a> · <a class="" href="symbols.html">Symbols</a> · <a class="" href="notes.html">Notes &amp; Props</a> · <a class="" href="hardening.html">Hardening</a> · <a class="" href="packages.html">Packages</a> · <a class="" href="needed.html">NEEDED graph</a> · <a class="" href="depgraph.html">Dep graph</a> · <a class="" href="anomalies.html">Survey anomalies</a> · <a class="" href="elflint.html">elflint findings</a></nav>
+  <p class="byline">Loadable bucket — 52,945 ELFs (82.8% of 63,950 total). See <a href="categories.html">Categories</a> for other buckets.</p>
+</header>
+<main>
+<section><h2>Program header types (PT_*)</h2>
+<div class="chart" style="height:320px"><canvas id="p_types"></canvas></div><script>new Chart(document.getElementById("p_types"),{"type": "bar", "data": {"labels": ["PT_LOAD", "PT_NOTE", "PT_GNU_STACK", "PT_DYNAMIC", "PT_GNU_RELRO", "PT_GNU_EH_FRAME", "PT_GNU_PROPERTY", "PT_PHDR", "PT_INTERP", "PT_TLS"], "datasets": [{"label": "ELFs containing each PT_*", "data": [211628, 103438, 52928, 52836, 52805, 51458, 50647, 19508, 19127, 4116], "backgroundColor": "#3b6ea5", "borderRadius": 2}]}, "options": {"indexAxis": "x", "responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"display": false}, "title": {"display": true, "text": "ELFs containing each PT_*"}}, "scales": {"x": {"ticks": {"autoSkip": true}}}}});</script><table class="data sortable"><thead><tr><th>PT_type</th><th>count</th><th>share</th></tr></thead><tbody><tr><td>PT_LOAD</td><td>211,628</td><td>34.22%</td></tr>
+<tr><td>PT_NOTE</td><td>103,438</td><td>16.72%</td></tr>
+<tr><td>PT_GNU_STACK</td><td>52,928</td><td>8.56%</td></tr>
+<tr><td>PT_DYNAMIC</td><td>52,836</td><td>8.54%</td></tr>
+<tr><td>PT_GNU_RELRO</td><td>52,805</td><td>8.54%</td></tr>
+<tr><td>PT_GNU_EH_FRAME</td><td>51,458</td><td>8.32%</td></tr>
+<tr><td>PT_GNU_PROPERTY</td><td>50,647</td><td>8.19%</td></tr>
+<tr><td>PT_PHDR</td><td>19,508</td><td>3.15%</td></tr>
+<tr><td>PT_INTERP</td><td>19,127</td><td>3.09%</td></tr>
+<tr><td>PT_TLS</td><td>4,116</td><td>0.67%</td></tr></tbody></table>
+</section>
+<section><h2>PT_LOAD permission combinations</h2>
+<div class="chart" style="height:280px"><canvas id="p_perms"></canvas></div><script>new Chart(document.getElementById("p_perms"),{"type": "doughnut", "data": {"labels": ["R", "RW", "RX", "RWX"], "datasets": [{"data": [104852, 53826, 52904, 46], "backgroundColor": ["#3b6ea5", "#e07b3a", "#5d9b6c", "#a85a8e", "#7a7a7a", "#c9b237", "#5a8fb3", "#b35a5a", "#7d6ea0", "#56a39a", "#a39a56", "#9a56a3"]}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"position": "right"}, "title": {"display": false, "text": ""}}}});</script><table class="data sortable"><thead><tr><th>permissions</th><th>count</th><th>share</th></tr></thead><tbody><tr><td>R</td><td>104,852</td><td>49.55%</td></tr>
+<tr><td>RW</td><td>53,826</td><td>25.43%</td></tr>
+<tr><td>RX</td><td>52,904</td><td>25.00%</td></tr>
+<tr><td>RWX</td><td>46</td><td>0.02%</td></tr></tbody></table>
+</section>
+<section><h2>PT_LOAD count distribution</h2>
+<div class="chart" style="height:280px"><canvas id="p_loadhist"></canvas></div><script>new Chart(document.getElementById("p_loadhist"),{"type": "bar", "data": {"labels": ["4", "1", "5", "2", "3"], "datasets": [{"label": "ELFs with N PT_LOAD segments", "data": [52839, 44, 31, 20, 11], "backgroundColor": "#3b6ea5", "borderRadius": 2}]}, "options": {"indexAxis": "x", "responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"display": false}, "title": {"display": true, "text": "ELFs with N PT_LOAD segments"}}, "scales": {"x": {"ticks": {"autoSkip": true}}}}});</script>
+</section>
+<section><h2>Total segment count distribution</h2>
+<div class="chart" style="height:280px"><canvas id="p_seghist"></canvas></div><script>new Chart(document.getElementById("p_seghist"),{"type": "bar", "data": {"labels": ["11", "13", "12", "14", "10", "9", "3", "7", "6", "8", "15", "4"], "datasets": [{"label": "ELFs with N total segments", "data": [31668, 16009, 2440, 1359, 943, 409, 61, 37, 8, 5, 5, 1], "backgroundColor": "#3b6ea5", "borderRadius": 2}]}, "options": {"indexAxis": "x", "responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"display": false}, "title": {"display": true, "text": "ELFs with N total segments"}}, "scales": {"x": {"ticks": {"autoSkip": true}}}}});</script>
+</section>
+<section><h2>Most-segmented binaries (top 100)</h2>
+<table class="data sortable"><thead><tr><th>segments</th><th>file</th></tr></thead><tbody><tr><td>15</td><td><code>community/nodejs-current-24.15.0-r0/usr/bin/node</code></td></tr>
+<tr><td>15</td><td><code>community/qt5-qtbase-5.15.10_git20230714-r4/usr/lib/libQt5Core.so.5.15.10</code></td></tr>
+<tr><td>15</td><td><code>community/qt5-qtbase-5.15.10_git20230714-r4/usr/lib/libQt5Core.so.5.15</code></td></tr>
+<tr><td>15</td><td><code>community/qt5-qtbase-5.15.10_git20230714-r4/usr/lib/libQt5Core.so.5</code></td></tr>
+<tr><td>15</td><td><code>main/nodejs-24.14.1-r0/usr/bin/node</code></td></tr>
+<tr><td>14</td><td><code>community/babeltrace-2.0.6-r0/usr/bin/babeltrace2</code></td></tr>
+<tr><td>14</td><td><code>community/afl++-4.34c-r0/usr/bin/afl-network-client</code></td></tr>
+<tr><td>14</td><td><code>community/arturo-0.9.84_alpha3414-r0/usr/bin/arturo</code></td></tr>
+<tr><td>14</td><td><code>community/accel-ppp-1.13.0-r1/usr/sbin/accel-pppd</code></td></tr>
+<tr><td>14</td><td><code>community/bpftrace-0.24.1-r1/usr/bin/bpftrace</code></td></tr>
+<tr><td>14</td><td><code>community/basu-0.2.1-r2/usr/bin/basuctl</code></td></tr>
+<tr><td>14</td><td><code>community/arturo-full-0.9.84_alpha3414-r0/usr/bin/arturo</code></td></tr>
+<tr><td>14</td><td><code>community/chatterino2-2.5.4-r0/usr/bin/chatterino</code></td></tr>
+<tr><td>14</td><td><code>community/chawan-0.3.0-r0/usr/libexec/chawan/cgi-bin/stbi</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-msp430-elf-2.44-r1/usr/bin/msp430-elf-ld.bfd</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-msp430-elf-2.44-r1/usr/bin/msp430-elf-ld</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-msp430-elf-2.44-r1/usr/bin/msp430-elf-nm</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-msp430-elf-2.44-r1/usr/bin/msp430-elf-objcopy</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-msp430-elf-2.44-r1/usr/bin/msp430-elf-objdump</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-msp430-elf-2.44-r1/usr/bin/msp430-elf-ranlib</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-msp430-elf-2.44-r1/usr/bin/msp430-elf-size</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-msp430-elf-2.44-r1/usr/bin/msp430-elf-strings</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-msp430-elf-2.44-r1/usr/bin/msp430-elf-strip</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-msp430-elf-2.44-r1/usr/msp430-elf/bin/ar</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-msp430-elf-2.44-r1/usr/msp430-elf/bin/as</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-msp430-elf-2.44-r1/usr/msp430-elf/bin/ld.bfd</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-msp430-elf-2.44-r1/usr/msp430-elf/bin/ld</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-msp430-elf-2.44-r1/usr/msp430-elf/bin/nm</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-msp430-elf-2.44-r1/usr/msp430-elf/bin/objcopy</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-msp430-elf-2.44-r1/usr/msp430-elf/bin/objdump</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-msp430-elf-2.44-r1/usr/msp430-elf/bin/ranlib</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-msp430-elf-2.44-r1/usr/msp430-elf/bin/strip</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-or1k-elf-2.44-r1/usr/bin/or1k-elf-addr2line</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-or1k-elf-2.44-r1/usr/bin/or1k-elf-ar</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-or1k-elf-2.44-r1/usr/bin/or1k-elf-as</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-or1k-elf-2.44-r1/usr/bin/or1k-elf-c++filt</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-or1k-elf-2.44-r1/usr/bin/or1k-elf-gprof</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-or1k-elf-2.44-r1/usr/bin/or1k-elf-ld.bfd</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-or1k-elf-2.44-r1/usr/bin/or1k-elf-ld</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-or1k-elf-2.44-r1/usr/bin/or1k-elf-nm</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-or1k-elf-2.44-r1/usr/bin/or1k-elf-objcopy</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-or1k-elf-2.44-r1/usr/bin/or1k-elf-objdump</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-or1k-elf-2.44-r1/usr/bin/or1k-elf-ranlib</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-or1k-elf-2.44-r1/usr/bin/or1k-elf-size</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-or1k-elf-2.44-r1/usr/bin/or1k-elf-strings</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-or1k-elf-2.44-r1/usr/bin/or1k-elf-strip</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-or1k-elf-2.44-r1/usr/or1k-elf/bin/ar</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-or1k-elf-2.44-r1/usr/or1k-elf/bin/as</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-or1k-elf-2.44-r1/usr/or1k-elf/bin/ld.bfd</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-or1k-elf-2.44-r1/usr/or1k-elf/bin/ld</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-or1k-elf-2.44-r1/usr/or1k-elf/bin/nm</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-or1k-elf-2.44-r1/usr/or1k-elf/bin/objcopy</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-or1k-elf-2.44-r1/usr/or1k-elf/bin/objdump</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-or1k-elf-2.44-r1/usr/or1k-elf/bin/ranlib</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-or1k-elf-2.44-r1/usr/or1k-elf/bin/strip</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-riscv-none-elf-2.44-r1/usr/bin/riscv-none-elf-addr2line</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-riscv-none-elf-2.44-r1/usr/bin/riscv-none-elf-ar</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-riscv-none-elf-2.44-r1/usr/bin/riscv-none-elf-as</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-riscv-none-elf-2.44-r1/usr/bin/riscv-none-elf-c++filt</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-riscv-none-elf-2.44-r1/usr/bin/riscv-none-elf-gprof</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-riscv-none-elf-2.44-r1/usr/bin/riscv-none-elf-ld.bfd</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-riscv-none-elf-2.44-r1/usr/bin/riscv-none-elf-ld</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-riscv-none-elf-2.44-r1/usr/bin/riscv-none-elf-nm</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-riscv-none-elf-2.44-r1/usr/bin/riscv-none-elf-objcopy</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-riscv-none-elf-2.44-r1/usr/bin/riscv-none-elf-objdump</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-riscv-none-elf-2.44-r1/usr/bin/riscv-none-elf-ranlib</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-riscv-none-elf-2.44-r1/usr/bin/riscv-none-elf-size</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-riscv-none-elf-2.44-r1/usr/bin/riscv-none-elf-strings</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-riscv-none-elf-2.44-r1/usr/bin/riscv-none-elf-strip</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-arm-none-eabi-2.44-r1/usr/bin/arm-none-eabi-size</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-arm-none-eabi-2.44-r1/usr/bin/arm-none-eabi-strings</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-arm-none-eabi-2.44-r1/usr/bin/arm-none-eabi-strip</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-avr-2.44-r1/usr/avr/bin/ar</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-avr-2.44-r1/usr/avr/bin/as</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-avr-2.44-r1/usr/avr/bin/ld.bfd</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-avr-2.44-r1/usr/avr/bin/ld</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-avr-2.44-r1/usr/avr/bin/nm</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-avr-2.44-r1/usr/avr/bin/objcopy</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-avr-2.44-r1/usr/avr/bin/objdump</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-avr-2.44-r1/usr/avr/bin/ranlib</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-avr-2.44-r1/usr/avr/bin/strip</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-avr-2.44-r1/usr/bin/avr-addr2line</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-avr-2.44-r1/usr/bin/avr-ar</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-avr-2.44-r1/usr/bin/avr-as</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-avr-2.44-r1/usr/bin/avr-c++filt</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-avr-2.44-r1/usr/bin/avr-gprof</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-avr-2.44-r1/usr/bin/avr-ld.bfd</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-avr-2.44-r1/usr/bin/avr-ld</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-avr-2.44-r1/usr/bin/avr-nm</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-avr-2.44-r1/usr/bin/avr-objcopy</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-avr-2.44-r1/usr/bin/avr-objdump</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-avr-2.44-r1/usr/bin/avr-ranlib</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-avr-2.44-r1/usr/bin/avr-size</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-avr-2.44-r1/usr/bin/avr-strings</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-avr-2.44-r1/usr/bin/avr-strip</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-i386-elf-2.44-r1/usr/bin/i386-elf-addr2line</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-i386-elf-2.44-r1/usr/bin/i386-elf-ar</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-i386-elf-2.44-r1/usr/bin/i386-elf-as</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-i386-elf-2.44-r1/usr/bin/i386-elf-c++filt</code></td></tr>
+<tr><td>14</td><td><code>community/binutils-i386-elf-2.44-r1/usr/bin/i386-elf-gprof</code></td></tr></tbody></table>
+</section>
+
+</main>
+<footer>
+  <p>Generated by <code>scripts/build_site.py</code> from
+     <code>corpus/survey.json</code>,
+     <code>corpus/elflint_summary.json</code>, and
+     <code>corpus/dep_graph.json</code>.
+     Raw data: <a href="data.json">data.json</a>.</p>
+</footer>
+</body>
+</html>

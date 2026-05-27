@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard — ElfZoo corpus</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<header>
+  <h1><a href="index.html">ElfZoo</a> — Dashboard</h1>
+  <nav><a class="active" href="index.html">Dashboard</a> · <a class="" href="categories.html">Categories</a> · <a class="" href="header.html">ELF Header</a> · <a class="" href="program.html">Program Headers</a> · <a class="" href="dynamic.html">Dynamic</a> · <a class="" href="relocations.html">Relocations</a> · <a class="" href="symbols.html">Symbols</a> · <a class="" href="notes.html">Notes &amp; Props</a> · <a class="" href="hardening.html">Hardening</a> · <a class="" href="packages.html">Packages</a> · <a class="" href="needed.html">NEEDED graph</a> · <a class="" href="depgraph.html">Dep graph</a> · <a class="" href="anomalies.html">Survey anomalies</a> · <a class="" href="elflint.html">elflint findings</a></nav>
+  <p class="byline">Alpine main + community · x86_64 · 63,950 ELFs · 52,945 loadable · static survey + eu-elflint 0.190 oracle</p>
+</header>
+<main>
+<section><h2>Corpus at a glance</h2>
+<div class="grid"><div class="card"><div class="num">63,950</div><div class="lbl">ELFs</div><div class="sub">across main + community</div></div>
+<div class="card"><div class="num">52,945</div><div class="lbl">loadable</div><div class="sub">82.8% — loader-spec target</div></div>
+<div class="card"><div class="num">10,190</div><div class="lbl">packages</div><div class="sub">unique &lt;pkg-ver-rel&gt; dirs</div></div>
+<div class="card"><div class="num">48,621</div><div class="lbl">clean (elflint)</div><div class="sub">76.0% of corpus</div></div>
+<div class="card"><div class="num">15,329</div><div class="lbl">dirty (elflint)</div><div class="sub">24.0% of corpus</div></div>
+<div class="card"><div class="num">826,215</div><div class="lbl">elflint findings</div><div class="sub">88 distinct kinds</div></div>
+<div class="card"><div class="num">180</div><div class="lbl">survey anomalies</div><div class="sub">6 kinds (all files)</div></div>
+<div class="card"><div class="num">10</div><div class="lbl">relocation types</div><div class="sub">1 architectures</div></div>
+<div class="card"><div class="num">4,787</div><div class="lbl">NEEDED libraries</div><div class="sub">distinct DT_NEEDED targets</div></div>
+<div class="card"><div class="num">3</div><div class="lbl">PT_INTERP variants</div><div class="sub">distinct loader paths</div></div>
+<div class="card"><div class="num">52,319</div><div class="lbl">BIND_NOW</div><div class="sub">98.8% of all-files are full-RELRO</div></div></div>
+</section>
+<section><h2>Categories</h2>
+<div class="chart" style="height:280px"><canvas id="ch_cats"></canvas></div><script>new Chart(document.getElementById("ch_cats"),{"type": "doughnut", "data": {"labels": ["loadable", "debuginfo", "relocatable", "other", "cross_arch"], "datasets": [{"data": [52945, 5344, 3807, 1769, 85], "backgroundColor": ["#3b6ea5", "#e07b3a", "#5d9b6c", "#a85a8e", "#7a7a7a", "#c9b237", "#5a8fb3", "#b35a5a", "#7d6ea0", "#56a39a", "#a39a56", "#9a56a3"]}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"position": "right"}, "title": {"display": true, "text": "ELFs per category"}}}});</script><table class="data sortable"><thead><tr><th>category</th><th>ELFs</th><th>share</th></tr></thead><tbody><tr><td>loadable</td><td>52,945</td><td>82.79%</td></tr>
+<tr><td>debuginfo</td><td>5,344</td><td>8.36%</td></tr>
+<tr><td>relocatable</td><td>3,807</td><td>5.95%</td></tr>
+<tr><td>other</td><td>1,769</td><td>2.77%</td></tr>
+<tr><td>cross_arch</td><td>85</td><td>0.13%</td></tr></tbody></table><p>See the <a href='categories.html'>Categories</a> page for full per-bucket detail. All other pages show data from the <strong>loadable</strong> bucket only — the real loader-spec target.</p>
+</section>
+<section><h2>Loadable e_type</h2>
+<p>The loadable bucket is by construction <code>EM_X86_64</code> + <code>ELFCLASS64</code> + <code>ELFDATA2LSB</code>. The only remaining ELF-header axis with variety here is the file type: shared objects vs executables. The <a href='header.html'>ELF Header</a> page shows the full corpus's variety on every axis.</p><div class="chart" style="height:280px"><canvas id="ch_et"></canvas></div><script>new Chart(document.getElementById("ch_et"),{"type": "doughnut", "data": {"labels": ["SharedObject", "Executable"], "datasets": [{"data": [52495, 450], "backgroundColor": ["#3b6ea5", "#e07b3a", "#5d9b6c", "#a85a8e", "#7a7a7a", "#c9b237", "#5a8fb3", "#b35a5a", "#7d6ea0", "#56a39a", "#a39a56", "#9a56a3"]}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"position": "right"}, "title": {"display": true, "text": "ET_ distribution (loadable)"}}}});</script>
+</section>
+<section><h2>How to read this site</h2>
+
+<p>This corpus is every <code>.apk</code> in Alpine
+<strong>main + community / x86_64</strong>, unpacked and indexed by
+<code>llvm-readobj-20 --elf-output-style=JSON</code>. Two parallel
+static-analysis passes feed the site:</p>
+<ul>
+<li><strong>Survey</strong> (<code>scripts/survey.py</code>) — fast
+    in-Python parser of the JSON dumps. Counts every ELF field,
+    cross-references against the spec, classifies each file into
+    one of five categories (loadable / debuginfo / relocatable /
+    cross_arch / other) and emits structured anomalies (e.g.
+    <code>ph_load_wx</code> when a PT_LOAD is W+X).</li>
+<li><strong>eu-elflint oracle</strong>
+    (<code>scripts/elflint_run.py</code>) — wraps elfutils 0.190
+    <code>eu-elflint -q</code> over the same corpus, normalises each
+    finding into a message template, and buckets by template.
+    Independent second opinion: we agree on what's broken when both
+    fire.</li>
+</ul>
+<p>Use the nav to drill into any axis. The
+<a href="anomalies.html">anomalies</a> and
+<a href="elflint.html">elflint</a> pages are the two strongest
+signals about non-standard ELFs in this corpus.</p>
+
+</section>
+
+</main>
+<footer>
+  <p>Generated by <code>scripts/build_site.py</code> from
+     <code>corpus/survey.json</code>,
+     <code>corpus/elflint_summary.json</code>, and
+     <code>corpus/dep_graph.json</code>.
+     Raw data: <a href="data.json">data.json</a>.</p>
+</footer>
+</body>
+</html>

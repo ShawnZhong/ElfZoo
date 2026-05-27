@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notes &amp; GNU props — ElfZoo corpus</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<header>
+  <h1><a href="index.html">ElfZoo</a> — Notes &amp; GNU props</h1>
+  <nav><a class="" href="index.html">Dashboard</a> · <a class="" href="categories.html">Categories</a> · <a class="" href="header.html">ELF Header</a> · <a class="" href="program.html">Program Headers</a> · <a class="" href="dynamic.html">Dynamic</a> · <a class="" href="relocations.html">Relocations</a> · <a class="" href="symbols.html">Symbols</a> · <a class="active" href="notes.html">Notes &amp; Props</a> · <a class="" href="hardening.html">Hardening</a> · <a class="" href="packages.html">Packages</a> · <a class="" href="needed.html">NEEDED graph</a> · <a class="" href="depgraph.html">Dep graph</a> · <a class="" href="anomalies.html">Survey anomalies</a> · <a class="" href="elflint.html">elflint findings</a></nav>
+  <p class="byline">Loadable bucket — 52,945 ELFs (82.8% of 63,950 total). See <a href="categories.html">Categories</a> for other buckets.</p>
+</header>
+<main>
+<section><h2>ELF note types (.note.*)</h2>
+<table class="data sortable"><thead><tr><th>note type</th><th>count</th><th>share</th></tr></thead><tbody><tr><td>NT_GNU_BUILD_ID</td><td>52,779</td><td>49.68%</td></tr>
+<tr><td>NT_GNU_PROPERTY_TYPE_0</td><td>50,664</td><td>47.69%</td></tr>
+<tr><td>Unknown</td><td>2,773</td><td>2.61%</td></tr>
+<tr><td>NT_GNU_ABI_TAG</td><td>16</td><td>0.02%</td></tr>
+<tr><td>NT_VERSION</td><td>4</td><td>0.00%</td></tr></tbody></table>
+</section>
+<section><h2>GNU properties (NT_GNU_PROPERTY_TYPE_0)</h2>
+<table class="data sortable"><thead><tr><th>property type / value</th><th>count</th><th>share</th></tr></thead><tbody><tr><td>x86 ISA used: x86-64-baseline</td><td>48,885</td><td>48.16%</td></tr>
+<tr><td>x86 feature used: x86, XMM</td><td>39,483</td><td>38.90%</td></tr>
+<tr><td>x86 feature used: x86</td><td>9,660</td><td>9.52%</td></tr>
+<tr><td>x86 ISA used: x86-64-baseline, x86-64-v2</td><td>839</td><td>0.83%</td></tr>
+<tr><td>x86 feature used: x86, x87, XMM</td><td>605</td><td>0.60%</td></tr>
+<tr><td>x86 ISA used: x86-64-baseline, x86-64-v2, x86-64-v3, x86-64-v4</td><td>355</td><td>0.35%</td></tr>
+<tr><td>x86 ISA used: x86-64-baseline, x86-64-v3</td><td>290</td><td>0.29%</td></tr>
+<tr><td>x86 feature used: x86, XMM, YMM</td><td>239</td><td>0.24%</td></tr>
+<tr><td>x86 ISA used: x86-64-baseline, x86-64-v2, x86-64-v3</td><td>206</td><td>0.20%</td></tr>
+<tr><td>stack size: 0x200000</td><td>130</td><td>0.13%</td></tr>
+<tr><td>x86 feature used: x86, x87, XMM, YMM, ZMM</td><td>109</td><td>0.11%</td></tr>
+<tr><td>x86 feature used: x86, XMM, YMM, ZMM, XSAVE, &lt;unknown flags: 0x800&gt;</td><td>93</td><td>0.09%</td></tr>
+<tr><td>x86 feature used: x86, XMM, YMM, ZMM, &lt;unknown flags: 0x800&gt;</td><td>82</td><td>0.08%</td></tr>
+<tr><td>x86 feature used: x86, MMX, XMM</td><td>58</td><td>0.06%</td></tr>
+<tr><td>x86 feature used: x86, XMM, YMM, XSAVE</td><td>53</td><td>0.05%</td></tr>
+<tr><td>x86 feature: IBT, SHSTK</td><td>49</td><td>0.05%</td></tr>
+<tr><td>x86 ISA used: x86-64-baseline, x86-64-v3, x86-64-v4</td><td>45</td><td>0.04%</td></tr>
+<tr><td>x86 feature used: x86, x87, XMM, YMM, XSAVE</td><td>43</td><td>0.04%</td></tr>
+<tr><td>x86 feature used: x86, XMM, XSAVE</td><td>36</td><td>0.04%</td></tr>
+<tr><td>stack size: 0x100000</td><td>32</td><td>0.03%</td></tr>
+<tr><td>x86 feature used: x86, x87, XMM, YMM, ZMM, XSAVE, &lt;unknown flags: 0x800&gt;</td><td>31</td><td>0.03%</td></tr>
+<tr><td>stack size: 0xfa300</td><td>30</td><td>0.03%</td></tr>
+<tr><td>x86 feature used: x86, XMM, YMM, ZMM, FXSR, XSAVE, &lt;unknown flags: 0x800&gt;</td><td>18</td><td>0.02%</td></tr>
+<tr><td>x86 feature used: x86, x87, XMM, YMM, ZMM, &lt;unknown flags: 0x800&gt;</td><td>17</td><td>0.02%</td></tr>
+<tr><td>x86 feature used: x86, XMM, YMM, ZMM</td><td>15</td><td>0.01%</td></tr>
+<tr><td>x86 feature used: x86, XMM, YMM, ZMM, XSAVE</td><td>13</td><td>0.01%</td></tr>
+<tr><td>x86 feature used: x86, x87, XMM, YMM</td><td>12</td><td>0.01%</td></tr>
+<tr><td>x86 feature used: x86, x87, XMM, YMM, ZMM, XSAVE, XSAVEOPT, &lt;unknown flags: 0x800&gt;</td><td>12</td><td>0.01%</td></tr>
+<tr><td>x86 ISA needed: x86-64-baseline</td><td>11</td><td>0.01%</td></tr>
+<tr><td>x86 feature used: x86, x87, MMX, XMM, YMM, XSAVE</td><td>9</td><td>0.01%</td></tr>
+<tr><td>x86 feature used: x86, MMX, XMM, YMM</td><td>8</td><td>0.01%</td></tr>
+<tr><td>x86 feature used: x86, MMX</td><td>5</td><td>0.00%</td></tr>
+<tr><td>x86 feature used: x86, x87, MMX, XMM, YMM, ZMM, &lt;unknown flags: 0x800&gt;</td><td>5</td><td>0.00%</td></tr>
+<tr><td>x86 feature used: x86, XMM, FXSR, XSAVE</td><td>4</td><td>0.00%</td></tr>
+<tr><td>stack size: 0x800000</td><td>4</td><td>0.00%</td></tr>
+<tr><td>x86 feature used: x86, x87, XMM, YMM, ZMM, XSAVE</td><td>3</td><td>0.00%</td></tr>
+<tr><td>x86 feature used: x86, MMX, XMM, YMM, XSAVE</td><td>2</td><td>0.00%</td></tr>
+<tr><td>x86 feature used: x86, x87, MMX, XMM</td><td>2</td><td>0.00%</td></tr>
+<tr><td>x86 feature used: x86, MMX, XMM, YMM, ZMM, &lt;unknown flags: 0x800&gt;</td><td>2</td><td>0.00%</td></tr>
+<tr><td>x86 ISA used: &lt;None&gt;</td><td>2</td><td>0.00%</td></tr>
+<tr><td>x86 feature used: x86, MMX, XMM, XSAVE</td><td>1</td><td>0.00%</td></tr>
+<tr><td>x86 feature used: x86, x87, MMX, XMM, YMM</td><td>1</td><td>0.00%</td></tr>
+<tr><td>x86 feature used: x86, x87</td><td>1</td><td>0.00%</td></tr></tbody></table>
+</section>
+<section><h2>Build-ID coverage</h2>
+<div class="grid"><div class="card"><div class="num">52,779</div><div class="lbl">ELFs with .note.gnu.build-id</div><div class="sub">99.7% of files</div></div></div>
+</section>
+
+</main>
+<footer>
+  <p>Generated by <code>scripts/build_site.py</code> from
+     <code>corpus/survey.json</code>,
+     <code>corpus/elflint_summary.json</code>, and
+     <code>corpus/dep_graph.json</code>.
+     Raw data: <a href="data.json">data.json</a>.</p>
+</footer>
+</body>
+</html>

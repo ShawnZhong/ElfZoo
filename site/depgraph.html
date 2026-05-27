@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dep graph — ElfZoo corpus</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<header>
+  <h1><a href="index.html">ElfZoo</a> — Dep graph</h1>
+  <nav><a class="" href="index.html">Dashboard</a> · <a class="" href="categories.html">Categories</a> · <a class="" href="header.html">ELF Header</a> · <a class="" href="program.html">Program Headers</a> · <a class="" href="dynamic.html">Dynamic</a> · <a class="" href="relocations.html">Relocations</a> · <a class="" href="symbols.html">Symbols</a> · <a class="" href="notes.html">Notes &amp; Props</a> · <a class="" href="hardening.html">Hardening</a> · <a class="" href="packages.html">Packages</a> · <a class="" href="needed.html">NEEDED graph</a> · <a class="active" href="depgraph.html">Dep graph</a> · <a class="" href="anomalies.html">Survey anomalies</a> · <a class="" href="elflint.html">elflint findings</a></nav>
+  <p class="byline">Loadable bucket — 52,945 ELFs (82.8% of 63,950 total). See <a href="categories.html">Categories</a> for other buckets.</p>
+</header>
+<main>
+<p>SONAME → DT_NEEDED graph built from every loadable ELF in the corpus. Closures are computed by BFS over the path graph; when a NEEDED soname has multiple in-corpus providers, the alphabetically-first one is picked (deterministic but ambiguous — flagged below). External sonames are NEEDED entries with no in-corpus provider — almost all are private plugin libs living in subdirs (LibreOffice <code>libreoffice/program/</code>, Perl <code>core_perl/CORE/</code>, etc.) that ld.so finds via DT_RPATH/RUNPATH at runtime.</p><section><h2>At a glance</h2>
+<div class="grid"><div class="card"><div class="num">52,937</div><div class="lbl">nodes</div><div class="sub">100.0% of loadable bucket</div></div>
+<div class="card"><div class="num">18,144</div><div class="lbl">providers</div><div class="sub">files with DT_SONAME</div></div>
+<div class="card"><div class="num">51,778</div><div class="lbl">consumers</div><div class="sub">files with ≥1 DT_NEEDED</div></div>
+<div class="card"><div class="num">10,663</div><div class="lbl">distinct sonames</div><div class="sub">across providers + NEEDED</div></div>
+<div class="card"><div class="num">5,555</div><div class="lbl">provider conflicts</div><div class="sub">&gt;1 provider for one SONAME</div></div>
+<div class="card"><div class="num">97</div><div class="lbl">external sonames</div><div class="sub">NEEDED with no in-corpus provider</div></div>
+<div class="card"><div class="num">0</div><div class="lbl">dep-graph cycles</div><div class="sub">non-trivial SCCs at soname level</div></div>
+<div class="card"><div class="num">0</div><div class="lbl">versioned-symbol mismatches</div><div class="sub">NEEDED verset absent from every provider</div></div></div>
+</section>
+<section><h2>Closure size distribution</h2>
+<p>Number of DSOs reachable from each consumer, including the transitive closure. The huge spike at <strong>1</strong> is libc-only consumers (tens of thousands of small CLIs and helpers).</p><div class="chart" style="height:280px"><canvas id="g_csize"></canvas></div><script>new Chart(document.getElementById("g_csize"),{"type": "bar", "data": {"labels": ["0", "1", "2-5", "6-10", "11-25", "26-50", "51-100", "101-200", "201-336"], "datasets": [{"label": "ELFs grouped by closure size", "data": [5, 13923, 12629, 5419, 6274, 3980, 5758, 3283, 507], "backgroundColor": "#3b6ea5", "borderRadius": 2}]}, "options": {"indexAxis": "x", "responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"display": false}, "title": {"display": true, "text": "ELFs grouped by closure size"}}, "scales": {"x": {"ticks": {"autoSkip": true}}}}});</script>
+</section>
+<section><h2>Top 30 most-depended-on sonames</h2>
+<p>How many in-corpus consumers list each SONAME as a direct DT_NEEDED. <code>libc.musl-x86_64.so.1</code> dominates — every dynamic Alpine binary lists it.</p><div class="chart" style="height:540px"><canvas id="g_in"></canvas></div><script>new Chart(document.getElementById("g_in"),{"type": "bar", "data": {"labels": ["libc.musl-x86_64.so.1", "libstdc++.so.6", "libgcc_s.so.1", "libglib-2.0.so.0", "libQt6Core.so.6", "libgobject-2.0.so.0", "libQt6Gui.so.6", "libgio-2.0.so.0", "libintl.so.8", "libz.so.1", "libKF6I18n.so.6", "libQt6Widgets.so.6", "libKF6CoreAddons.so.6", "libcrypto.so.3", "libQt5Core.so.5", "libX11.so.6", "libKF6ConfigCore.so.6", "libgtk-3.so.0", "libprotobuf.so.31", "libabsl_log_internal_message.so.2508.0.0", "libzstd.so.1", "libcairo.so.2", "libabsl_strings.so.2508.0.0", "libQt6Qml.so.6", "libaws-cpp-sdk-core.so.1.11", "libQt5Gui.so.5", "libQt6DBus.so.6", "libgdk-3.so.0", "libssl.so.3", "libxml2.so.2"], "datasets": [{"label": "in-degree (#consumers)", "data": [51210, 16764, 12132, 4799, 4452, 4083, 2719, 2306, 2265, 2127, 1956, 1906, 1867, 1850, 1621, 1451, 1339, 1334, 1040, 1007, 952, 947, 920, 899, 840, 828, 806, 803, 795, 780], "backgroundColor": "#3b6ea5", "borderRadius": 2}]}, "options": {"indexAxis": "y", "responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"display": false}, "title": {"display": true, "text": "in-degree (#consumers)"}}, "scales": {"x": {"ticks": {"autoSkip": true}}}}});</script>
+</section>
+<section><h2>Top 30 most-NEEDED-heavy ELFs</h2>
+<p>Files with the largest direct DT_NEEDED lists. These are typically big test binaries or "everything-linked" service binaries.</p><table class="data sortable"><thead><tr><th>NEEDED</th><th>file</th></tr></thead><tbody><tr><td>98</td><td><code>community/spdk-25.05-r2/usr/bin/spdk_tgt</code></td></tr>
+<tr><td>93</td><td><code>main/samba-test-4.22.8-r0/usr/bin/smbtorture</code></td></tr>
+<tr><td>92</td><td><code>community/spdk-25.05-r2/usr/bin/vhost</code></td></tr>
+<tr><td>92</td><td><code>community/spdk-25.05-r2/usr/bin/iscsi_tgt</code></td></tr>
+<tr><td>89</td><td><code>community/spdk-25.05-r2/usr/bin/nvmf_tgt</code></td></tr>
+<tr><td>84</td><td><code>community/spdk-25.05-r2/usr/bin/spdk_dd</code></td></tr>
+<tr><td>79</td><td><code>community/kmail-25.08.3-r0/usr/lib/libkmailprivate.so.6</code></td></tr>
+<tr><td>79</td><td><code>community/kmail-25.08.3-r0/usr/lib/libkmailprivate.so.6.5.3</code></td></tr>
+<tr><td>79</td><td><code>community/audacity-3.7.5-r3/usr/bin/audacity</code></td></tr>
+<tr><td>66</td><td><code>community/webkit2gtk-4.1-2.48.1-r2/usr/lib/libwebkit2gtk-4.1.so.0</code></td></tr>
+<tr><td>66</td><td><code>community/webkit2gtk-4.1-2.48.1-r2/usr/lib/libwebkit2gtk-4.1.so.0.17.6</code></td></tr>
+<tr><td>65</td><td><code>community/webkit2gtk-6.0-2.48.1-r2/usr/lib/libwebkitgtk-6.0.so.4.11.6</code></td></tr>
+<tr><td>65</td><td><code>community/webkit2gtk-6.0-2.48.1-r2/usr/lib/libwebkitgtk-6.0.so.4</code></td></tr>
+<tr><td>61</td><td><code>community/telegram-desktop-6.3.4-r0/usr/bin/Telegram</code></td></tr>
+<tr><td>61</td><td><code>community/kodi-wayland-21.3-r1/usr/bin/kodi-wayland</code></td></tr>
+<tr><td>60</td><td><code>community/kodi-gbm-21.3-r1/usr/bin/kodi-gbm</code></td></tr>
+<tr><td>60</td><td><code>main/samba-common-tools-4.22.8-r0/usr/bin/net</code></td></tr>
+<tr><td>59</td><td><code>community/kodi-x11-21.3-r1/usr/lib/kodi/kodi-x11</code></td></tr>
+<tr><td>57</td><td><code>main/samba-winbind-4.22.8-r0/usr/sbin/winbindd</code></td></tr>
+<tr><td>57</td><td><code>community/chromium-148.0.7778.178-r0/usr/lib/chromium/chromium</code></td></tr>
+<tr><td>57</td><td><code>community/chromium-148.0.7778.178-r0/usr/lib/chromium/chrome</code></td></tr>
+<tr><td>56</td><td><code>community/kicad-9.0.6-r0/usr/bin/_pcbnew.kiface</code></td></tr>
+<tr><td>56</td><td><code>community/kicad-9.0.6-r0/usr/lib/python3.12/site-packages/_pcbnew.so</code></td></tr>
+<tr><td>55</td><td><code>community/kwin-6.5.6-r1/usr/lib/libkwin.so.6</code></td></tr>
+<tr><td>55</td><td><code>community/kwin-6.5.6-r1/usr/lib/libkwin.so.6.5.6</code></td></tr>
+<tr><td>55</td><td><code>community/kdenlive-25.08.3-r3/usr/bin/kdenlive</code></td></tr>
+<tr><td>55</td><td><code>community/blender-5.0.0-r0/usr/bin/blender</code></td></tr>
+<tr><td>54</td><td><code>community/mixxx-2.5.3-r2/usr/bin/mixxx</code></td></tr>
+<tr><td>54</td><td><code>main/samba-common-server-libs-4.22.8-r0/usr/lib/samba/libsmbd-base-private-samba.so</code></td></tr>
+<tr><td>53</td><td><code>community/digikam-8.8.0-r0/usr/lib/libdigikamcore.so.8.8.0</code></td></tr></tbody></table>
+</section>
+<section><h2>Top 30 largest transitive closures</h2>
+<p>How many distinct DSOs a binary <em>transitively</em> pulls in (BFS via NEEDED, picking the first in-corpus provider per SONAME). The biggest closures are KDE-PIM and KDE-mail plugins.</p><table class="data sortable"><thead><tr><th>closure size</th><th>external</th><th>file</th></tr></thead><tbody><tr><td>336</td><td>0</td><td><code>community/kdepim-addons-25.08.3-r0/usr/lib/qt6/plugins/pim6/messageviewer/bodypartformatter/messageviewer_bodypartformatter_semantic.so</code></td></tr>
+<tr><td>297</td><td>0</td><td><code>community/kmail-25.08.3-r0/usr/bin/kmail</code></td></tr>
+<tr><td>296</td><td>0</td><td><code>community/kmail-25.08.3-r0/usr/lib/qt6/plugins/kmailpart.so</code></td></tr>
+<tr><td>295</td><td>0</td><td><code>community/kmail-25.08.3-r0/usr/lib/qt6/plugins/pim6/kcms/kmail/kcm_kmail_security.so</code></td></tr>
+<tr><td>295</td><td>0</td><td><code>community/kmail-25.08.3-r0/usr/lib/qt6/plugins/pim6/kcms/kmail/kcm_kmail_appearance.so</code></td></tr>
+<tr><td>295</td><td>0</td><td><code>community/kmail-25.08.3-r0/usr/lib/qt6/plugins/pim6/kcms/kmail/kcm_kmail_misc.so</code></td></tr>
+<tr><td>295</td><td>0</td><td><code>community/kmail-25.08.3-r0/usr/lib/qt6/plugins/pim6/kcms/kmail/kcm_kmail_accounts.so</code></td></tr>
+<tr><td>295</td><td>0</td><td><code>community/kmail-25.08.3-r0/usr/lib/qt6/plugins/pim6/kcms/kmail/kcm_kmail_plugins.so</code></td></tr>
+<tr><td>295</td><td>0</td><td><code>community/kmail-25.08.3-r0/usr/lib/qt6/plugins/pim6/kcms/kmail/kcm_kmail_composer.so</code></td></tr>
+<tr><td>294</td><td>0</td><td><code>community/kmail-25.08.3-r0/usr/lib/libkmailprivate.so.6</code></td></tr>
+<tr><td>294</td><td>0</td><td><code>community/kmail-25.08.3-r0/usr/lib/libkmailprivate.so.6.5.3</code></td></tr>
+<tr><td>292</td><td>0</td><td><code>community/korganizer-25.08.3-r0/usr/bin/korganizer</code></td></tr>
+<tr><td>290</td><td>0</td><td><code>community/korganizer-25.08.3-r0/usr/lib/qt6/plugins/korganizerpart.so</code></td></tr>
+<tr><td>290</td><td>0</td><td><code>community/korganizer-25.08.3-r0/usr/lib/qt6/plugins/pim6/kcms/korganizer/korganizer_userfeedback.so</code></td></tr>
+<tr><td>289</td><td>0</td><td><code>community/korganizer-25.08.3-r0/usr/lib/qt6/plugins/pim6/kcms/korganizer/korganizer_configtime.so</code></td></tr>
+<tr><td>288</td><td>0</td><td><code>community/merkuro-25.08.3-r3/usr/bin/merkuro-mail</code></td></tr>
+<tr><td>288</td><td>0</td><td><code>community/korganizer-25.08.3-r0/usr/lib/libkorganizerprivate.so.6</code></td></tr>
+<tr><td>288</td><td>0</td><td><code>community/korganizer-25.08.3-r0/usr/lib/libkorganizerprivate.so.6.5.3</code></td></tr>
+<tr><td>288</td><td>0</td><td><code>community/kdepim-runtime-25.08.3-r0/usr/bin/akonadi_google_resource</code></td></tr>
+<tr><td>286</td><td>0</td><td><code>community/korganizer-25.08.3-r0/usr/lib/qt6/plugins/pim6/kcms/korganizer/korganizer_configgroupscheduling.so</code></td></tr>
+<tr><td>286</td><td>0</td><td><code>community/merkuro-25.08.3-r3/usr/bin/merkuro-calendar</code></td></tr>
+<tr><td>285</td><td>0</td><td><code>community/korganizer-25.08.3-r0/usr/lib/qt6/plugins/pim6/kcms/korganizer/korganizer_configplugins.so</code></td></tr>
+<tr><td>285</td><td>0</td><td><code>community/korganizer-25.08.3-r0/usr/lib/qt6/plugins/pim6/kcms/korganizer/korganizer_configviews.so</code></td></tr>
+<tr><td>285</td><td>0</td><td><code>community/korganizer-25.08.3-r0/usr/lib/qt6/plugins/pim6/kcms/korganizer/korganizer_configcolorsandfonts.so</code></td></tr>
+<tr><td>285</td><td>0</td><td><code>community/korganizer-25.08.3-r0/usr/lib/qt6/plugins/pim6/kcms/korganizer/korganizer_configmain.so</code></td></tr>
+<tr><td>285</td><td>0</td><td><code>community/kdepim-addons-25.08.3-r0/usr/lib/qt6/plugins/pim6/messageviewer/viewerplugin/messageviewer_createtodoplugin.so</code></td></tr>
+<tr><td>285</td><td>0</td><td><code>community/kdepim-addons-25.08.3-r0/usr/lib/qt6/plugins/pim6/messageviewer/viewerplugin/messageviewer_createeventplugin.so</code></td></tr>
+<tr><td>285</td><td>0</td><td><code>community/kdepim-addons-25.08.3-r0/usr/lib/qt6/plugins/pim6/messageviewer/bodypartformatter/messageviewer_bodypartformatter_text_calendar.so</code></td></tr>
+<tr><td>284</td><td>0</td><td><code>community/korganizer-25.08.3-r0/usr/lib/libkorganizer_core.so.6</code></td></tr>
+<tr><td>284</td><td>0</td><td><code>community/korganizer-25.08.3-r0/usr/lib/qt6/plugins/pim6/kontact/kontact_specialdatesplugin.so</code></td></tr></tbody></table>
+</section>
+<section><h2>Provider conflicts (top 50 of 5,555)</h2>
+<p>SONAMEs declared by more than one file in the corpus. A few real causes: (1) symlink + real file both get recorded as separate ELFs (most cases); (2) plugin systems where every backend ships with the same SONAME (<code>libsane.so.1</code> for sane-backends, <code>lib.so</code> for OpenJDK’s JLI plugins); (3) parallel toolchain installs (<code>libcc1plugin</code>, .NET runtime/bootstrap).</p><table class="data sortable"><thead><tr><th>#providers</th><th>soname</th><th>providers (head)</th></tr></thead><tbody><tr><td>278</td><td><code>libsane.so.1</code></td><td><ul class='paths'><li><code>community/sane-1.4.0-r3/usr/lib/libsane.so.1</code></li><li><code>community/sane-1.4.0-r3/usr/lib/libsane.so.1.4.0</code></li><li><code>community/sane-1.4.0-r3/usr/lib/sane/libsane-dll.so</code></li></ul><p><em> … and 275 more</em></p></td></tr>
+<tr><td>54</td><td><code>lib.so</code></td><td><ul class='paths'><li><code>community/openjdk8-jdk-8.482.08-r0/usr/lib/jvm/java-1.8-openjdk/bin/clhsdb</code></li><li><code>community/openjdk8-jdk-8.482.08-r0/usr/lib/jvm/java-1.8-openjdk/bin/extcheck</code></li><li><code>community/openjdk8-jdk-8.482.08-r0/usr/lib/jvm/java-1.8-openjdk/bin/hsdb</code></li></ul><p><em> … and 51 more</em></p></td></tr>
+<tr><td>36</td><td><code>libcc1plugin.so.0</code></td><td><ul class='paths'><li><code>community/gcc-aarch64-none-elf-15.2.0-r1/usr/lib/gcc/aarch64-none-elf/15.2.0/plugin/libcc1plugin.so</code></li><li><code>community/gcc-aarch64-none-elf-15.2.0-r1/usr/lib/gcc/aarch64-none-elf/15.2.0/plugin/libcc1plugin.so.0</code></li><li><code>community/gcc-aarch64-none-elf-15.2.0-r1/usr/lib/gcc/aarch64-none-elf/15.2.0/plugin/libcc1plugin.so.0.0.0</code></li></ul><p><em> … and 33 more</em></p></td></tr>
+<tr><td>36</td><td><code>libcp1plugin.so.0</code></td><td><ul class='paths'><li><code>community/gcc-aarch64-none-elf-15.2.0-r1/usr/lib/gcc/aarch64-none-elf/15.2.0/plugin/libcp1plugin.so</code></li><li><code>community/gcc-aarch64-none-elf-15.2.0-r1/usr/lib/gcc/aarch64-none-elf/15.2.0/plugin/libcp1plugin.so.0</code></li><li><code>community/gcc-aarch64-none-elf-15.2.0-r1/usr/lib/gcc/aarch64-none-elf/15.2.0/plugin/libcp1plugin.so.0.0.0</code></li></ul><p><em> … and 33 more</em></p></td></tr>
+<tr><td>20</td><td><code>plugin.so</code></td><td><ul class='paths'><li><code>community/gnumeric-1.12.59-r0/usr/lib/gnumeric/1.12.59/plugins/excelplugins/plugin.so</code></li><li><code>community/gnumeric-1.12.59-r0/usr/lib/gnumeric/1.12.59/plugins/fn-christian-date/plugin.so</code></li><li><code>community/gnumeric-1.12.59-r0/usr/lib/gnumeric/1.12.59/plugins/fn-complex/plugin.so</code></li></ul><p><em> … and 17 more</em></p></td></tr>
+<tr><td>17</td><td><code>libSystem.Globalization.Native.so</code></td><td><ul class='paths'><li><code>community/dotnet10-runtime-10.0.8-r0/usr/lib/dotnet/shared/Microsoft.NETCore.App/10.0.8/libSystem.Globalization.Native.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/packs/Microsoft.NETCore.App.Runtime.NativeAOT.alpine.3.23-x64/10.0.8/runtimes/alpine.3.23-x64/native/libSystem.Globalization.Native.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/packs/Microsoft.NETCore.App.Runtime.alpine.3.23-x64/10.0.8/runtimes/alpine.3.23-x64/native/libSystem.Globalization.Native.so</code></li></ul><p><em> … and 14 more</em></p></td></tr>
+<tr><td>17</td><td><code>libSystem.IO.Compression.Native.so</code></td><td><ul class='paths'><li><code>community/dotnet10-runtime-10.0.8-r0/usr/lib/dotnet/shared/Microsoft.NETCore.App/10.0.8/libSystem.IO.Compression.Native.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/packs/Microsoft.NETCore.App.Runtime.NativeAOT.alpine.3.23-x64/10.0.8/runtimes/alpine.3.23-x64/native/libSystem.IO.Compression.Native.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/packs/Microsoft.NETCore.App.Runtime.alpine.3.23-x64/10.0.8/runtimes/alpine.3.23-x64/native/libSystem.IO.Compression.Native.so</code></li></ul><p><em> … and 14 more</em></p></td></tr>
+<tr><td>17</td><td><code>libSystem.Native.so</code></td><td><ul class='paths'><li><code>community/dotnet10-runtime-10.0.8-r0/usr/lib/dotnet/shared/Microsoft.NETCore.App/10.0.8/libSystem.Native.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/packs/Microsoft.NETCore.App.Runtime.NativeAOT.alpine.3.23-x64/10.0.8/runtimes/alpine.3.23-x64/native/libSystem.Native.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/packs/Microsoft.NETCore.App.Runtime.alpine.3.23-x64/10.0.8/runtimes/alpine.3.23-x64/native/libSystem.Native.so</code></li></ul><p><em> … and 14 more</em></p></td></tr>
+<tr><td>17</td><td><code>libSystem.Net.Security.Native.so</code></td><td><ul class='paths'><li><code>community/dotnet10-runtime-10.0.8-r0/usr/lib/dotnet/shared/Microsoft.NETCore.App/10.0.8/libSystem.Net.Security.Native.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/packs/Microsoft.NETCore.App.Runtime.NativeAOT.alpine.3.23-x64/10.0.8/runtimes/alpine.3.23-x64/native/libSystem.Net.Security.Native.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/packs/Microsoft.NETCore.App.Runtime.alpine.3.23-x64/10.0.8/runtimes/alpine.3.23-x64/native/libSystem.Net.Security.Native.so</code></li></ul><p><em> … and 14 more</em></p></td></tr>
+<tr><td>17</td><td><code>libSystem.Security.Cryptography.Native.OpenSsl.so</code></td><td><ul class='paths'><li><code>community/dotnet10-runtime-10.0.8-r0/usr/lib/dotnet/shared/Microsoft.NETCore.App/10.0.8/libSystem.Security.Cryptography.Native.OpenSsl.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/packs/Microsoft.NETCore.App.Runtime.NativeAOT.alpine.3.23-x64/10.0.8/runtimes/alpine.3.23-x64/native/libSystem.Security.Cryptography.Native.OpenSsl.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/packs/Microsoft.NETCore.App.Runtime.alpine.3.23-x64/10.0.8/runtimes/alpine.3.23-x64/native/libSystem.Security.Cryptography.Native.OpenSsl.so</code></li></ul><p><em> … and 14 more</em></p></td></tr>
+<tr><td>14</td><td><code>liblto_plugin.so</code></td><td><ul class='paths'><li><code>community/gcc-aarch64-none-elf-15.2.0-r1/usr/lib/gcc/aarch64-none-elf/15.2.0/liblto_plugin.so</code></li><li><code>community/gcc-arm-none-eabi-15.2.0-r1/usr/lib/gcc/arm-none-eabi/15.2.0/liblto_plugin.so</code></li><li><code>community/gcc-avr-15.2.0-r0/usr/lib/gcc/avr/15.2.0/liblto_plugin.so</code></li></ul><p><em> … and 11 more</em></p></td></tr>
+<tr><td>13</td><td><code>libdril_dri.so</code></td><td><ul class='paths'><li><code>main/mesa-dri-gallium-25.2.7-r1/usr/lib/dri/crocus_dri.so</code></li><li><code>main/mesa-dri-gallium-25.2.7-r1/usr/lib/dri/i915_dri.so</code></li><li><code>main/mesa-dri-gallium-25.2.7-r1/usr/lib/dri/iris_dri.so</code></li></ul><p><em> … and 10 more</em></p></td></tr>
+<tr><td>12</td><td><code>libclrgc.so</code></td><td><ul class='paths'><li><code>community/dotnet10-runtime-10.0.8-r0/usr/lib/dotnet/shared/Microsoft.NETCore.App/10.0.8/libclrgc.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/packs/Microsoft.NETCore.App.Runtime.alpine.3.23-x64/10.0.8/runtimes/alpine.3.23-x64/native/libclrgc.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/shared/Microsoft.NETCore.App/10.0.8/libclrgc.so</code></li></ul><p><em> … and 9 more</em></p></td></tr>
+<tr><td>12</td><td><code>libclrjit.so</code></td><td><ul class='paths'><li><code>community/dotnet10-runtime-10.0.8-r0/usr/lib/dotnet/shared/Microsoft.NETCore.App/10.0.8/libclrjit.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/packs/Microsoft.NETCore.App.Runtime.alpine.3.23-x64/10.0.8/runtimes/alpine.3.23-x64/native/libclrjit.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/shared/Microsoft.NETCore.App/10.0.8/libclrjit.so</code></li></ul><p><em> … and 9 more</em></p></td></tr>
+<tr><td>12</td><td><code>libcoreclr.so</code></td><td><ul class='paths'><li><code>community/dotnet10-runtime-10.0.8-r0/usr/lib/dotnet/shared/Microsoft.NETCore.App/10.0.8/libcoreclr.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/packs/Microsoft.NETCore.App.Runtime.alpine.3.23-x64/10.0.8/runtimes/alpine.3.23-x64/native/libcoreclr.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/shared/Microsoft.NETCore.App/10.0.8/libcoreclr.so</code></li></ul><p><em> … and 9 more</em></p></td></tr>
+<tr><td>12</td><td><code>libhostfxr.so</code></td><td><ul class='paths'><li><code>community/dotnet10-hostfxr-10.0.8-r0/usr/lib/dotnet/host/fxr/10.0.8/libhostfxr.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/host/fxr/10.0.8/libhostfxr.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/packs/Microsoft.NETCore.App.Runtime.alpine.3.23-x64/10.0.8/runtimes/alpine.3.23-x64/native/libhostfxr.so</code></li></ul><p><em> … and 9 more</em></p></td></tr>
+<tr><td>12</td><td><code>libhostpolicy.so</code></td><td><ul class='paths'><li><code>community/dotnet10-runtime-10.0.8-r0/usr/lib/dotnet/shared/Microsoft.NETCore.App/10.0.8/libhostpolicy.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/packs/Microsoft.NETCore.App.Runtime.alpine.3.23-x64/10.0.8/runtimes/alpine.3.23-x64/native/libhostpolicy.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/shared/Microsoft.NETCore.App/10.0.8/libhostpolicy.so</code></li></ul><p><em> … and 9 more</em></p></td></tr>
+<tr><td>12</td><td><code>libmscordaccore.so</code></td><td><ul class='paths'><li><code>community/dotnet10-runtime-10.0.8-r0/usr/lib/dotnet/shared/Microsoft.NETCore.App/10.0.8/libmscordaccore.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/packs/Microsoft.NETCore.App.Runtime.alpine.3.23-x64/10.0.8/runtimes/alpine.3.23-x64/native/libmscordaccore.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/shared/Microsoft.NETCore.App/10.0.8/libmscordaccore.so</code></li></ul><p><em> … and 9 more</em></p></td></tr>
+<tr><td>12</td><td><code>libmscordbi.so</code></td><td><ul class='paths'><li><code>community/dotnet10-runtime-10.0.8-r0/usr/lib/dotnet/shared/Microsoft.NETCore.App/10.0.8/libmscordbi.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/packs/Microsoft.NETCore.App.Runtime.alpine.3.23-x64/10.0.8/runtimes/alpine.3.23-x64/native/libmscordbi.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/shared/Microsoft.NETCore.App/10.0.8/libmscordbi.so</code></li></ul><p><em> … and 9 more</em></p></td></tr>
+<tr><td>10</td><td><code>libcoreclrtraceptprovider.so</code></td><td><ul class='paths'><li><code>community/dotnet10-runtime-10.0.8-r0/usr/lib/dotnet/shared/Microsoft.NETCore.App/10.0.8/libcoreclrtraceptprovider.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/packs/Microsoft.NETCore.App.Runtime.alpine.3.23-x64/10.0.8/runtimes/alpine.3.23-x64/native/libcoreclrtraceptprovider.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/shared/Microsoft.NETCore.App/10.0.8/libcoreclrtraceptprovider.so</code></li></ul><p><em> … and 7 more</em></p></td></tr>
+<tr><td>10</td><td><code>libdep.so</code></td><td><ul class='paths'><li><code>community/binutils-aarch64-none-elf-2.44-r1/usr/aarch64-none-elf/lib/bfd-plugins/libdep.so</code></li><li><code>community/binutils-arm-none-eabi-2.44-r1/usr/arm-none-eabi/lib/bfd-plugins/libdep.so</code></li><li><code>community/binutils-avr-2.44-r1/usr/avr/lib/bfd-plugins/libdep.so</code></li></ul><p><em> … and 7 more</em></p></td></tr>
+<tr><td>9</td><td><code>libnethost.so</code></td><td><ul class='paths'><li><code>community/dotnet10-apphost-pack-10.0.8-r0/usr/lib/dotnet/packs/Microsoft.NETCore.App.Host.alpine.3.23-x64/10.0.8/runtimes/alpine.3.23-x64/native/libnethost.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/packs/Microsoft.NETCore.App.Host.alpine.3.23-x64/10.0.8/runtimes/alpine.3.23-x64/native/libnethost.so</code></li><li><code>community/dotnet10-stage0-bootstrap-10.0.100-r0/usr/lib/dotnet/bootstrap/10.0.100/packs/Microsoft.NETCore.App.Host.linux-musl-x64/10.0.0/runtimes/linux-musl-x64/native/libnethost.so</code></li></ul><p><em> … and 6 more</em></p></td></tr>
+<tr><td>8</td><td><code>libclrgcexp.so</code></td><td><ul class='paths'><li><code>community/dotnet10-runtime-10.0.8-r0/usr/lib/dotnet/shared/Microsoft.NETCore.App/10.0.8/libclrgcexp.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/packs/Microsoft.NETCore.App.Runtime.alpine.3.23-x64/10.0.8/runtimes/alpine.3.23-x64/native/libclrgcexp.so</code></li><li><code>community/dotnet10-runtime-bootstrap-10.0.8-r0/usr/lib/dotnet/bootstrap/10.0.108/shared/Microsoft.NETCore.App/10.0.8/libclrgcexp.so</code></li></ul><p><em> … and 5 more</em></p></td></tr>
+<tr><td>8</td><td><code>libgcompat.so.0</code></td><td><ul class='paths'><li><code>main/gcompat-1.1.0-r4/lib/libc.so.6</code></li><li><code>main/gcompat-1.1.0-r4/lib/libcrypt.so.1</code></li><li><code>main/gcompat-1.1.0-r4/lib/libgcompat.so.0</code></li></ul><p><em> … and 5 more</em></p></td></tr>
+<tr><td>8</td><td><code>libjsig.so</code></td><td><ul class='paths'><li><code>community/openjdk11-jre-headless-11.0.31_p11-r0/usr/lib/jvm/java-11-openjdk/lib/libjsig.so</code></li><li><code>community/openjdk11-jre-headless-11.0.31_p11-r0/usr/lib/jvm/java-11-openjdk/lib/server/libjsig.so</code></li><li><code>community/openjdk17-jre-headless-17.0.19_p10-r0/usr/lib/jvm/java-17-openjdk/lib/libjsig.so</code></li></ul><p><em> … and 5 more</em></p></td></tr>
+<tr><td>7</td><td><code>ldap.so</code></td><td><ul class='paths'><li><code>community/php83-ldap-8.3.31-r0/usr/lib/php83/modules/ldap.so</code></li><li><code>community/php84-ldap-8.4.21-r0/usr/lib/php84/modules/ldap.so</code></li><li><code>community/php85-ldap-8.5.6-r0/usr/lib/php85/modules/ldap.so</code></li></ul><p><em> … and 4 more</em></p></td></tr>
+<tr><td>7</td><td><code>libecpg.so.6</code></td><td><ul class='paths'><li><code>community/agensgraph-2.16.0-r0/usr/lib/agensgraph/libecpg.so</code></li><li><code>community/agensgraph-2.16.0-r0/usr/lib/agensgraph/libecpg.so.6</code></li><li><code>community/agensgraph-2.16.0-r0/usr/lib/agensgraph/libecpg.so.6.16</code></li></ul><p><em> … and 4 more</em></p></td></tr>
+<tr><td>7</td><td><code>libpgtypes.so.3</code></td><td><ul class='paths'><li><code>community/agensgraph-2.16.0-r0/usr/lib/agensgraph/libpgtypes.so</code></li><li><code>community/agensgraph-2.16.0-r0/usr/lib/agensgraph/libpgtypes.so.3</code></li><li><code>community/agensgraph-2.16.0-r0/usr/lib/agensgraph/libpgtypes.so.3.16</code></li></ul><p><em> … and 4 more</em></p></td></tr>
+<tr><td>6</td><td><code>libSDL2-2.0.so.0</code></td><td><ul class='paths'><li><code>community/sdl2-2.32.10-r0/usr/lib/libSDL2-2.0.so</code></li><li><code>community/sdl2-2.32.10-r0/usr/lib/libSDL2-2.0.so.0</code></li><li><code>community/sdl2-2.32.10-r0/usr/lib/libSDL2-2.0.so.0.3200.10</code></li></ul><p><em> … and 3 more</em></p></td></tr>
+<tr><td>6</td><td><code>libceph_librbd_parent_cache.so.1</code></td><td><ul class='paths'><li><code>community/ceph18-18.2.7-r3/usr/lib/ceph/librbd/libceph_librbd_parent_cache.so</code></li><li><code>community/ceph18-18.2.7-r3/usr/lib/ceph/librbd/libceph_librbd_parent_cache.so.1</code></li><li><code>community/ceph18-18.2.7-r3/usr/lib/ceph/librbd/libceph_librbd_parent_cache.so.1.0.0</code></li></ul><p><em> … and 3 more</em></p></td></tr>
+<tr><td>6</td><td><code>libceph_lz4.so.2</code></td><td><ul class='paths'><li><code>community/ceph18-base-18.2.7-r3/usr/lib/ceph/compressor/libceph_lz4.so</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/ceph/compressor/libceph_lz4.so.2</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/ceph/compressor/libceph_lz4.so.2.0.0</code></li></ul><p><em> … and 3 more</em></p></td></tr>
+<tr><td>6</td><td><code>libceph_snappy.so.2</code></td><td><ul class='paths'><li><code>community/ceph18-base-18.2.7-r3/usr/lib/ceph/compressor/libceph_snappy.so</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/ceph/compressor/libceph_snappy.so.2</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/ceph/compressor/libceph_snappy.so.2.0.0</code></li></ul><p><em> … and 3 more</em></p></td></tr>
+<tr><td>6</td><td><code>libceph_zlib.so.2</code></td><td><ul class='paths'><li><code>community/ceph18-base-18.2.7-r3/usr/lib/ceph/compressor/libceph_zlib.so</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/ceph/compressor/libceph_zlib.so.2</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/ceph/compressor/libceph_zlib.so.2.0.0</code></li></ul><p><em> … and 3 more</em></p></td></tr>
+<tr><td>6</td><td><code>libceph_zstd.so.2</code></td><td><ul class='paths'><li><code>community/ceph18-base-18.2.7-r3/usr/lib/ceph/compressor/libceph_zstd.so</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/ceph/compressor/libceph_zstd.so.2</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/ceph/compressor/libceph_zstd.so.2.0.0</code></li></ul><p><em> … and 3 more</em></p></td></tr>
+<tr><td>6</td><td><code>libcls_2pc_queue.so.1</code></td><td><ul class='paths'><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_2pc_queue.so</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_2pc_queue.so.1</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_2pc_queue.so.1.0.0</code></li></ul><p><em> … and 3 more</em></p></td></tr>
+<tr><td>6</td><td><code>libcls_cas.so.1</code></td><td><ul class='paths'><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_cas.so</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_cas.so.1</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_cas.so.1.0.0</code></li></ul><p><em> … and 3 more</em></p></td></tr>
+<tr><td>6</td><td><code>libcls_cephfs.so.1</code></td><td><ul class='paths'><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_cephfs.so</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_cephfs.so.1</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_cephfs.so.1.0.0</code></li></ul><p><em> … and 3 more</em></p></td></tr>
+<tr><td>6</td><td><code>libcls_cmpomap.so.1</code></td><td><ul class='paths'><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_cmpomap.so</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_cmpomap.so.1</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_cmpomap.so.1.0.0</code></li></ul><p><em> … and 3 more</em></p></td></tr>
+<tr><td>6</td><td><code>libcls_fifo.so.1</code></td><td><ul class='paths'><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_fifo.so</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_fifo.so.1</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_fifo.so.1.0.0</code></li></ul><p><em> … and 3 more</em></p></td></tr>
+<tr><td>6</td><td><code>libcls_hello.so.1</code></td><td><ul class='paths'><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_hello.so</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_hello.so.1</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_hello.so.1.0.0</code></li></ul><p><em> … and 3 more</em></p></td></tr>
+<tr><td>6</td><td><code>libcls_journal.so.1</code></td><td><ul class='paths'><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_journal.so</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_journal.so.1</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_journal.so.1.0.0</code></li></ul><p><em> … and 3 more</em></p></td></tr>
+<tr><td>6</td><td><code>libcls_lock.so.1</code></td><td><ul class='paths'><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_lock.so</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_lock.so.1</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_lock.so.1.0.0</code></li></ul><p><em> … and 3 more</em></p></td></tr>
+<tr><td>6</td><td><code>libcls_log.so.1</code></td><td><ul class='paths'><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_log.so</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_log.so.1</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_log.so.1.0.0</code></li></ul><p><em> … and 3 more</em></p></td></tr>
+<tr><td>6</td><td><code>libcls_lua.so.1</code></td><td><ul class='paths'><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_lua.so</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_lua.so.1</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_lua.so.1.0.0</code></li></ul><p><em> … and 3 more</em></p></td></tr>
+<tr><td>6</td><td><code>libcls_numops.so.1</code></td><td><ul class='paths'><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_numops.so</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_numops.so.1</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_numops.so.1.0.0</code></li></ul><p><em> … and 3 more</em></p></td></tr>
+<tr><td>6</td><td><code>libcls_otp.so.1</code></td><td><ul class='paths'><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_otp.so</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_otp.so.1</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_otp.so.1.0.0</code></li></ul><p><em> … and 3 more</em></p></td></tr>
+<tr><td>6</td><td><code>libcls_queue.so.1</code></td><td><ul class='paths'><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_queue.so</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_queue.so.1</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_queue.so.1.0.0</code></li></ul><p><em> … and 3 more</em></p></td></tr>
+<tr><td>6</td><td><code>libcls_rbd.so.1</code></td><td><ul class='paths'><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_rbd.so</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_rbd.so.1</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_rbd.so.1.0.0</code></li></ul><p><em> … and 3 more</em></p></td></tr>
+<tr><td>6</td><td><code>libcls_refcount.so.1</code></td><td><ul class='paths'><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_refcount.so</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_refcount.so.1</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_refcount.so.1.0.0</code></li></ul><p><em> … and 3 more</em></p></td></tr>
+<tr><td>6</td><td><code>libcls_rgw.so.1</code></td><td><ul class='paths'><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_rgw.so</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_rgw.so.1</code></li><li><code>community/ceph18-base-18.2.7-r3/usr/lib/rados-classes/libcls_rgw.so.1.0.0</code></li></ul><p><em> … and 3 more</em></p></td></tr></tbody></table>
+</section>
+<section><h2>External sonames (top 40 of 97)</h2>
+<p>NEEDED entries that no in-corpus ELF advertises via DT_SONAME. Most are private plugin libs that ld.so finds via DT_RPATH/RUNPATH — e.g. LibreOffice ships dozens of unversioned <code>*lo.so</code> backends under <code>/usr/lib/libreoffice/program/</code>.</p><table class="data sortable"><thead><tr><th>#consumers</th><th>soname</th></tr></thead><tbody><tr><td>185</td><td><code>libcomphelper.so</code></td></tr>
+<tr><td>157</td><td><code>libtllo.so</code></td></tr>
+<tr><td>128</td><td><code>libutllo.so</code></td></tr>
+<tr><td>100</td><td><code>libvcllo.so</code></td></tr>
+<tr><td>97</td><td><code>libi18nlangtag.so</code></td></tr>
+<tr><td>72</td><td><code>libucbhelper.so</code></td></tr>
+<tr><td>71</td><td><code>libsvllo.so</code></td></tr>
+<tr><td>63</td><td><code>libsvtlo.so</code></td></tr>
+<tr><td>57</td><td><code>libsfxlo.so</code></td></tr>
+<tr><td>47</td><td><code>libbasegfxlo.so</code></td></tr>
+<tr><td>44</td><td><code>libtcl8.6.so</code></td></tr>
+<tr><td>44</td><td><code>libtklo.so</code></td></tr>
+<tr><td>43</td><td><code>libsotlo.so</code></td></tr>
+<tr><td>35</td><td><code>libsvxcorelo.so</code></td></tr>
+<tr><td>33</td><td><code>libperl.so</code></td></tr>
+<tr><td>30</td><td><code>libdbtoolslo.so</code></td></tr>
+<tr><td>29</td><td><code>libsvxlo.so</code></td></tr>
+<tr><td>29</td><td><code>libxolo.so</code></td></tr>
+<tr><td>27</td><td><code>libeditenglo.so</code></td></tr>
+<tr><td>26</td><td><code>libsaxlo.so</code></td></tr>
+<tr><td>22</td><td><code>libi18nutil.so</code></td></tr>
+<tr><td>21</td><td><code>libardourcp.so</code></td></tr>
+<tr><td>20</td><td><code>libsblo.so</code></td></tr>
+<tr><td>17</td><td><code>libR.so</code></td></tr>
+<tr><td>17</td><td><code>libautofs.so</code></td></tr>
+<tr><td>17</td><td><code>libdrawinglayerlo.so</code></td></tr>
+<tr><td>16</td><td><code>libdrawinglayercorelo.so</code></td></tr>
+<tr><td>15</td><td><code>libdocmodello.so</code></td></tr>
+<tr><td>14</td><td><code>libfwklo.so</code></td></tr>
+<tr><td>14</td><td><code>libmoar.so</code></td></tr>
+<tr><td>13</td><td><code>libmer_rt.so</code></td></tr>
+<tr><td>12</td><td><code>libjvmaccesslo.so</code></td></tr>
+<tr><td>11</td><td><code>libmsfilterlo.so</code></td></tr>
+<tr><td>10</td><td><code>libc.so.6</code></td></tr>
+<tr><td>9</td><td><code>libavmedialo.so</code></td></tr>
+<tr><td>9</td><td><code>libcanvastoolslo.so</code></td></tr>
+<tr><td>9</td><td><code>liblnglo.so</code></td></tr>
+<tr><td>9</td><td><code>libmer_std.so</code></td></tr>
+<tr><td>8</td><td><code>libfreeradius-eap.so</code></td></tr>
+<tr><td>8</td><td><code>libfreeradius-radius.so</code></td></tr></tbody></table>
+</section>
+<section><h2>Dep-graph cycles</h2>
+<p><strong>None.</strong> The corpus-wide SONAME-level NEEDED graph is a DAG — no in-corpus library cycles through itself. This is the expected outcome for a well-curated distribution: ld.so can resolve every dependency in a single topological pass without cycle-breaking heuristics.</p>
+</section>
+<section><h2>Versioned-symbol mismatches</h2>
+<p><strong>None.</strong> For every <code>(soname, verset)</code> requested via DT_VERNEED, some in-corpus provider of that SONAME declares that verset via DT_VERDEF. The corpus is self-consistent on versioned-symbol presence (modulo external sonames, which by construction can’t be checked here).</p>
+</section>
+
+</main>
+<footer>
+  <p>Generated by <code>scripts/build_site.py</code> from
+     <code>corpus/survey.json</code>,
+     <code>corpus/elflint_summary.json</code>, and
+     <code>corpus/dep_graph.json</code>.
+     Raw data: <a href="data.json">data.json</a>.</p>
+</footer>
+</body>
+</html>

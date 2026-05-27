@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ELF Header — ElfZoo corpus</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<header>
+  <h1><a href="index.html">ElfZoo</a> — ELF Header</h1>
+  <nav><a class="" href="index.html">Dashboard</a> · <a class="" href="categories.html">Categories</a> · <a class="active" href="header.html">ELF Header</a> · <a class="" href="program.html">Program Headers</a> · <a class="" href="dynamic.html">Dynamic</a> · <a class="" href="relocations.html">Relocations</a> · <a class="" href="symbols.html">Symbols</a> · <a class="" href="notes.html">Notes &amp; Props</a> · <a class="" href="hardening.html">Hardening</a> · <a class="" href="packages.html">Packages</a> · <a class="" href="needed.html">NEEDED graph</a> · <a class="" href="depgraph.html">Dep graph</a> · <a class="" href="anomalies.html">Survey anomalies</a> · <a class="" href="elflint.html">elflint findings</a></nav>
+  <p class="byline">Loadable bucket — 52,945 ELFs (82.8% of 63,950 total). See <a href="categories.html">Categories</a> for other buckets.</p>
+</header>
+<main>
+<section><h2>Machine (e_machine) — full distribution</h2>
+<div class="chart" style="height:420px"><canvas id="h_mach_full"></canvas></div><script>new Chart(document.getElementById("h_mach_full"),{"type": "bar", "data": {"labels": ["EM_X86_64"], "datasets": [{"label": "ELFs per e_machine (top 25)", "data": [52945], "backgroundColor": "#3b6ea5", "borderRadius": 2}]}, "options": {"indexAxis": "x", "responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"display": false}, "title": {"display": true, "text": "ELFs per e_machine (top 25)"}}, "scales": {"x": {"ticks": {"autoSkip": true}}}}});</script><table class="data sortable"><thead><tr><th>e_machine</th><th>count</th><th>share</th></tr></thead><tbody><tr><td>EM_X86_64</td><td>52,945</td><td>100.00%</td></tr></tbody></table>
+</section>
+<section><h2>ELF class (e_ident[EI_CLASS])</h2>
+<div class="chart" style="height:280px"><canvas id="h_cls"></canvas></div><script>new Chart(document.getElementById("h_cls"),{"type": "doughnut", "data": {"labels": ["64-bit"], "datasets": [{"data": [52945], "backgroundColor": ["#3b6ea5", "#e07b3a", "#5d9b6c", "#a85a8e", "#7a7a7a", "#c9b237", "#5a8fb3", "#b35a5a", "#7d6ea0", "#56a39a", "#a39a56", "#9a56a3"]}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"position": "right"}, "title": {"display": false, "text": ""}}}});</script><table class="data sortable"><thead><tr><th>ELFCLASS</th><th>count</th><th>share</th></tr></thead><tbody><tr><td>64-bit</td><td>52,945</td><td>100.00%</td></tr></tbody></table>
+</section>
+<section><h2>Data encoding (e_ident[EI_DATA])</h2>
+<div class="chart" style="height:280px"><canvas id="h_data"></canvas></div><script>new Chart(document.getElementById("h_data"),{"type": "doughnut", "data": {"labels": ["LittleEndian"], "datasets": [{"data": [52945], "backgroundColor": ["#3b6ea5", "#e07b3a", "#5d9b6c", "#a85a8e", "#7a7a7a", "#c9b237", "#5a8fb3", "#b35a5a", "#7d6ea0", "#56a39a", "#a39a56", "#9a56a3"]}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"position": "right"}, "title": {"display": false, "text": ""}}}});</script><table class="data sortable"><thead><tr><th>ELFDATA</th><th>count</th><th>share</th></tr></thead><tbody><tr><td>LittleEndian</td><td>52,945</td><td>100.00%</td></tr></tbody></table>
+</section>
+<section><h2>OS/ABI (e_ident[EI_OSABI])</h2>
+<div class="chart" style="height:280px"><canvas id="h_osabi"></canvas></div><script>new Chart(document.getElementById("h_osabi"),{"type": "doughnut", "data": {"labels": ["SystemV", "GNU/Linux"], "datasets": [{"data": [52944, 1], "backgroundColor": ["#3b6ea5", "#e07b3a", "#5d9b6c", "#a85a8e", "#7a7a7a", "#c9b237", "#5a8fb3", "#b35a5a", "#7d6ea0", "#56a39a", "#a39a56", "#9a56a3"]}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"position": "right"}, "title": {"display": false, "text": ""}}}});</script><table class="data sortable"><thead><tr><th>ELFOSABI</th><th>count</th><th>share</th></tr></thead><tbody><tr><td>SystemV</td><td>52,944</td><td>100.00%</td></tr>
+<tr><td>GNU/Linux</td><td>1</td><td>0.00%</td></tr></tbody></table>
+</section>
+<section><h2>File type (e_type)</h2>
+<div class="chart" style="height:280px"><canvas id="h_etype"></canvas></div><script>new Chart(document.getElementById("h_etype"),{"type": "doughnut", "data": {"labels": ["SharedObject", "Executable"], "datasets": [{"data": [52495, 450], "backgroundColor": ["#3b6ea5", "#e07b3a", "#5d9b6c", "#a85a8e", "#7a7a7a", "#c9b237", "#5a8fb3", "#b35a5a", "#7d6ea0", "#56a39a", "#a39a56", "#9a56a3"]}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"position": "right"}, "title": {"display": false, "text": ""}}}});</script><table class="data sortable"><thead><tr><th>ET_</th><th>count</th><th>share</th></tr></thead><tbody><tr><td>SharedObject</td><td>52,495</td><td>99.15%</td></tr>
+<tr><td>Executable</td><td>450</td><td>0.85%</td></tr></tbody></table>
+</section>
+<section><h2>Loader (PT_INTERP)</h2>
+<table class="data sortable"><thead><tr><th>PT_INTERP</th><th>count</th><th>share</th></tr></thead><tbody><tr><td>/lib/ld-musl-x86_64.so.1</td><td>19,076</td><td>99.76%</td></tr>
+<tr><td>/lib/klibc-9vLHAZcNKxq3B_Xm2VgObIOCxrU.so</td><td>35</td><td>0.18%</td></tr>
+<tr><td>/lib64/ld-linux-x86-64.so.2</td><td>10</td><td>0.05%</td></tr></tbody></table>
+</section>
+
+</main>
+<footer>
+  <p>Generated by <code>scripts/build_site.py</code> from
+     <code>corpus/survey.json</code>,
+     <code>corpus/elflint_summary.json</code>, and
+     <code>corpus/dep_graph.json</code>.
+     Raw data: <a href="data.json">data.json</a>.</p>
+</footer>
+</body>
+</html>

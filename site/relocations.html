@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relocations — ElfZoo corpus</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<header>
+  <h1><a href="index.html">ElfZoo</a> — Relocations</h1>
+  <nav><a class="" href="index.html">Dashboard</a> · <a class="" href="categories.html">Categories</a> · <a class="" href="header.html">ELF Header</a> · <a class="" href="program.html">Program Headers</a> · <a class="" href="dynamic.html">Dynamic</a> · <a class="active" href="relocations.html">Relocations</a> · <a class="" href="symbols.html">Symbols</a> · <a class="" href="notes.html">Notes &amp; Props</a> · <a class="" href="hardening.html">Hardening</a> · <a class="" href="packages.html">Packages</a> · <a class="" href="needed.html">NEEDED graph</a> · <a class="" href="depgraph.html">Dep graph</a> · <a class="" href="anomalies.html">Survey anomalies</a> · <a class="" href="elflint.html">elflint findings</a></nav>
+  <p class="byline">Loadable bucket — 52,945 ELFs (82.8% of 63,950 total). See <a href="categories.html">Categories</a> for other buckets.</p>
+</header>
+<main>
+<section><h2>Reloc type prevalence (top 50 of 10)</h2>
+<table class="data sortable"><thead><tr><th>reloc type</th><th>count</th><th>share</th></tr></thead><tbody><tr><td>R_X86_64_RELATIVE</td><td>155,164,528</td><td>84.37%</td></tr>
+<tr><td>R_X86_64_64</td><td>16,299,798</td><td>8.86%</td></tr>
+<tr><td>R_X86_64_GLOB_DAT</td><td>11,506,766</td><td>6.26%</td></tr>
+<tr><td>R_X86_64_JUMP_SLOT</td><td>854,003</td><td>0.46%</td></tr>
+<tr><td>R_X86_64_COPY</td><td>71,951</td><td>0.04%</td></tr>
+<tr><td>R_X86_64_DTPMOD64</td><td>6,839</td><td>0.00%</td></tr>
+<tr><td>R_X86_64_DTPOFF64</td><td>4,785</td><td>0.00%</td></tr>
+<tr><td>R_X86_64_TPOFF64</td><td>2,756</td><td>0.00%</td></tr>
+<tr><td>R_X86_64_IRELATIVE</td><td>42</td><td>0.00%</td></tr>
+<tr><td>R_X86_64_TLSDESC</td><td>38</td><td>0.00%</td></tr></tbody></table>
+</section>
+<section><h2>Reloc categories</h2>
+<div class="grid"><div class="card"><div class="num">1</div><div class="lbl">IFUNC reloc users</div></div>
+<div class="card"><div class="num">12,864</div><div class="lbl">COPY reloc users</div><div class="sub">24.3%</div></div>
+<div class="card"><div class="num">3,383</div><div class="lbl">TLS reloc users</div><div class="sub">6.4%</div></div>
+<div class="card"><div class="num">130</div><div class="lbl">no relocations</div><div class="sub">0.2% of files</div></div></div>
+</section>
+<section id="arch-EM_X86_64"><h2>EM_X86_64: reloc type distribution (10 types)</h2>
+<table class="data sortable"><thead><tr><th>reloc type</th><th>count</th><th>share</th></tr></thead><tbody><tr><td>R_X86_64_RELATIVE</td><td>155,164,528</td><td>84.37%</td></tr>
+<tr><td>R_X86_64_64</td><td>16,299,798</td><td>8.86%</td></tr>
+<tr><td>R_X86_64_GLOB_DAT</td><td>11,506,766</td><td>6.26%</td></tr>
+<tr><td>R_X86_64_JUMP_SLOT</td><td>854,003</td><td>0.46%</td></tr>
+<tr><td>R_X86_64_COPY</td><td>71,951</td><td>0.04%</td></tr>
+<tr><td>R_X86_64_DTPMOD64</td><td>6,839</td><td>0.00%</td></tr>
+<tr><td>R_X86_64_DTPOFF64</td><td>4,785</td><td>0.00%</td></tr>
+<tr><td>R_X86_64_TPOFF64</td><td>2,756</td><td>0.00%</td></tr>
+<tr><td>R_X86_64_IRELATIVE</td><td>42</td><td>0.00%</td></tr>
+<tr><td>R_X86_64_TLSDESC</td><td>38</td><td>0.00%</td></tr></tbody></table>
+</section>
+<section><h2>Top relocations-per-binary (top 100)</h2>
+<table class="data sortable"><thead><tr><th>relocations</th><th>file</th></tr></thead><tbody><tr><td>1,929,366</td><td><code>community/wireshark-common-4.6.5-r0/usr/lib/libwireshark.so.19.0.5</code></td></tr>
+<tr><td>1,929,366</td><td><code>community/wireshark-common-4.6.5-r0/usr/lib/libwireshark.so.19</code></td></tr>
+<tr><td>1,818,100</td><td><code>community/alloy-1.11.3-r6/usr/bin/alloy</code></td></tr>
+<tr><td>1,331,379</td><td><code>community/telegraf-1.36.4-r6/usr/bin/telegraf</code></td></tr>
+<tr><td>1,314,704</td><td><code>community/grafana-12.2.8-r0/usr/bin/grafana</code></td></tr>
+<tr><td>983,545</td><td><code>community/chromium-148.0.7778.178-r0/usr/lib/chromium/chrome</code></td></tr>
+<tr><td>983,545</td><td><code>community/chromium-148.0.7778.178-r0/usr/lib/chromium/chromium</code></td></tr>
+<tr><td>798,898</td><td><code>community/traefik-3.7.1-r0/usr/sbin/traefik</code></td></tr>
+<tr><td>768,119</td><td><code>community/k3s-1.34.2.1-r6/usr/bin/k3s</code></td></tr>
+<tr><td>661,547</td><td><code>community/gitea-1.24.6-r7/usr/bin/gitea</code></td></tr>
+<tr><td>657,597</td><td><code>community/forgejo-13.0.5-r4/usr/bin/forgejo</code></td></tr>
+<tr><td>655,269</td><td><code>community/ghc-9.8.2-r2/usr/lib/ghc-9.8.2/lib/x86_64-linux-ghc-9.8.2/libHSghc-9.8.2-inplace-ghc9.8.2.so</code></td></tr>
+<tr><td>648,169</td><td><code>community/forgejo-lts-11.0.13-r1/usr/bin/forgejo</code></td></tr>
+<tr><td>644,341</td><td><code>community/mimic1-1.3.0.1-r1/usr/lib/libttsmimic_lang_vid_gb_ap.so.0.0.0</code></td></tr>
+<tr><td>644,341</td><td><code>community/mimic1-1.3.0.1-r1/usr/lib/libttsmimic_lang_vid_gb_ap.so.0</code></td></tr>
+<tr><td>603,030</td><td><code>community/k9s-0.50.16-r6/usr/bin/k9s</code></td></tr>
+<tr><td>591,504</td><td><code>community/openbao-2.5.4-r0/usr/bin/bao</code></td></tr>
+<tr><td>570,385</td><td><code>community/prometheus-3.5.3-r1/usr/bin/prometheus</code></td></tr>
+<tr><td>554,963</td><td><code>community/prometheus-3.5.3-r1/usr/bin/promtool</code></td></tr>
+<tr><td>531,517</td><td><code>community/loki-promtail-3.5.8-r6/usr/bin/promtail</code></td></tr>
+<tr><td>508,392</td><td><code>community/loki-3.5.8-r6/usr/bin/loki</code></td></tr>
+<tr><td>495,232</td><td><code>community/thunderbird-145.0-r0/usr/lib/thunderbird/libxul.so</code></td></tr>
+<tr><td>488,418</td><td><code>community/hugo-0.152.2-r6/usr/bin/hugo</code></td></tr>
+<tr><td>485,607</td><td><code>community/qt6-qtwebengine-6.10.3-r3/usr/lib/libQt6WebEngineCore.so.6.10.3</code></td></tr>
+<tr><td>485,607</td><td><code>community/qt6-qtwebengine-6.10.3-r3/usr/lib/libQt6WebEngineCore.so.6</code></td></tr>
+<tr><td>481,425</td><td><code>community/scummvm-2.9.1-r1/usr/bin/scummvm</code></td></tr>
+<tr><td>478,412</td><td><code>community/librewolf-144.0_p1-r0/usr/lib/librewolf/libxul.so</code></td></tr>
+<tr><td>468,948</td><td><code>community/chromium-headless-shell-148.0.7778.178-r0/usr/bin/chromium-headless-shell</code></td></tr>
+<tr><td>468,948</td><td><code>community/chromium-headless-shell-148.0.7778.178-r0/usr/lib/chromium/chromium-headless-shell</code></td></tr>
+<tr><td>460,275</td><td><code>community/firefox-esr-140.11.0-r0/usr/lib/firefox-esr/libxul.so</code></td></tr>
+<tr><td>455,252</td><td><code>community/firefox-145.0-r0/usr/lib/firefox/libxul.so</code></td></tr>
+<tr><td>453,825</td><td><code>community/mimir-3.0.0-r6/usr/bin/mimir</code></td></tr>
+<tr><td>449,346</td><td><code>community/gitlab-runner-18.11.2-r1/usr/bin/gitlab-runner</code></td></tr>
+<tr><td>442,569</td><td><code>community/grype-0.104.1-r6/usr/bin/grype</code></td></tr>
+<tr><td>434,401</td><td><code>community/zotero-7.0.32-r4/usr/lib/zotero/libxul.so</code></td></tr>
+<tr><td>426,112</td><td><code>community/libgeocoding-9.0.19-r0/usr/lib/libgeocoding.so.9.0</code></td></tr>
+<tr><td>426,112</td><td><code>community/libgeocoding-9.0.19-r0/usr/lib/libgeocoding.so.9</code></td></tr>
+<tr><td>423,117</td><td><code>community/flux-2.7.3-r6/usr/bin/flux</code></td></tr>
+<tr><td>421,433</td><td><code>community/gomplate-4.3.3-r9/usr/bin/gomplate</code></td></tr>
+<tr><td>417,229</td><td><code>community/qt5-qtwebengine-5.15.17-r11/usr/lib/libQt5WebEngineCore.so.5.15.10</code></td></tr>
+<tr><td>417,229</td><td><code>community/qt5-qtwebengine-5.15.17-r11/usr/lib/libQt5WebEngineCore.so.5.15</code></td></tr>
+<tr><td>417,229</td><td><code>community/qt5-qtwebengine-5.15.17-r11/usr/lib/libQt5WebEngineCore.so.5</code></td></tr>
+<tr><td>412,785</td><td><code>community/rclone-1.72.1-r4/usr/bin/rclone</code></td></tr>
+<tr><td>412,785</td><td><code>community/rclone-1.72.1-r4/usr/bin/rclonefs</code></td></tr>
+<tr><td>412,785</td><td><code>community/rclone-1.72.1-r4/usr/sbin/mount.rclone</code></td></tr>
+<tr><td>410,382</td><td><code>community/cosign-2.6.3-r1/usr/bin/cosign</code></td></tr>
+<tr><td>410,243</td><td><code>community/loki-logcli-3.5.8-r6/usr/bin/logcli</code></td></tr>
+<tr><td>407,639</td><td><code>community/minio-0.20251015.172955-r6/usr/bin/minio</code></td></tr>
+<tr><td>401,598</td><td><code>main/llvm16-libs-16.0.6-r13/usr/lib/libLLVM-16.0.6.so</code></td></tr>
+<tr><td>401,598</td><td><code>main/llvm16-libs-16.0.6-r13/usr/lib/libLLVM-16.so</code></td></tr>
+<tr><td>401,598</td><td><code>main/llvm16-libs-16.0.6-r13/usr/lib/llvm16/lib/libLLVM-16.0.6.so</code></td></tr>
+<tr><td>401,598</td><td><code>main/llvm16-libs-16.0.6-r13/usr/lib/llvm16/lib/libLLVM-16.so</code></td></tr>
+<tr><td>383,624</td><td><code>community/netdata-go-plugins-1.47.5-r22/usr/libexec/netdata/plugins.d/go.d.plugin</code></td></tr>
+<tr><td>381,975</td><td><code>community/docker-engine-29.5.1-r0/usr/bin/dockerd</code></td></tr>
+<tr><td>381,558</td><td><code>community/llvm15-libs-15.0.7-r19/usr/lib/libLLVM-15.0.7.so</code></td></tr>
+<tr><td>381,558</td><td><code>community/llvm15-libs-15.0.7-r19/usr/lib/libLLVM-15.so</code></td></tr>
+<tr><td>381,558</td><td><code>community/llvm15-libs-15.0.7-r19/usr/lib/llvm15/lib/libLLVM-15.0.7.so</code></td></tr>
+<tr><td>381,558</td><td><code>community/llvm15-libs-15.0.7-r19/usr/lib/llvm15/lib/libLLVM-15.so</code></td></tr>
+<tr><td>378,228</td><td><code>community/lego-4.29.0-r6/usr/bin/lego</code></td></tr>
+<tr><td>373,784</td><td><code>main/llvm20-libs-20.1.8-r0/usr/lib/libLLVM-20.so</code></td></tr>
+<tr><td>373,784</td><td><code>main/llvm20-libs-20.1.8-r0/usr/lib/libLLVM.so.20.1</code></td></tr>
+<tr><td>373,784</td><td><code>main/llvm20-libs-20.1.8-r0/usr/lib/llvm20/lib/libLLVM-20.so</code></td></tr>
+<tr><td>373,784</td><td><code>main/llvm20-libs-20.1.8-r0/usr/lib/llvm20/lib/libLLVM.so.20.1</code></td></tr>
+<tr><td>368,013</td><td><code>main/llvm16-16.0.6-r13/usr/bin/llvm16-exegesis</code></td></tr>
+<tr><td>368,013</td><td><code>main/llvm16-16.0.6-r13/usr/lib/llvm16/bin/llvm-exegesis</code></td></tr>
+<tr><td>366,404</td><td><code>community/frr-10.5.3-r1/usr/bin/vtysh</code></td></tr>
+<tr><td>364,005</td><td><code>community/telegram-desktop-6.3.4-r0/usr/bin/Telegram</code></td></tr>
+<tr><td>360,346</td><td><code>main/libgo-15.2.0-r2/usr/lib/libgo.so.24.0.0</code></td></tr>
+<tr><td>360,346</td><td><code>main/libgo-15.2.0-r2/usr/lib/libgo.so.24</code></td></tr>
+<tr><td>357,799</td><td><code>community/opentofu-1.10.6-r8/usr/bin/tofu</code></td></tr>
+<tr><td>356,669</td><td><code>community/pulumi-3.204.0-r6/usr/bin/pulumi</code></td></tr>
+<tr><td>355,606</td><td><code>community/miller-6.15.0-r8/usr/bin/mlr</code></td></tr>
+<tr><td>351,150</td><td><code>community/syft-1.38.0-r6/usr/bin/syft</code></td></tr>
+<tr><td>345,719</td><td><code>community/mimir-3.0.0-r6/usr/bin/mimirtool</code></td></tr>
+<tr><td>333,809</td><td><code>main/gdb-multiarch-16.3-r2/usr/bin/gdb-multiarch</code></td></tr>
+<tr><td>330,146</td><td><code>community/rekor-server-1.4.2-r6/usr/bin/rekor-server</code></td></tr>
+<tr><td>329,245</td><td><code>community/llvm19-libs-19.1.7-r7/usr/lib/libLLVM.so.19.1</code></td></tr>
+<tr><td>329,245</td><td><code>community/llvm19-libs-19.1.7-r7/usr/lib/llvm19/lib/libLLVM.so.19.1</code></td></tr>
+<tr><td>318,999</td><td><code>community/kube-apiserver-1.34.2-r6/usr/bin/kube-apiserver</code></td></tr>
+<tr><td>309,312</td><td><code>community/kubo-0.39.0-r6/usr/bin/ipfs</code></td></tr>
+<tr><td>308,110</td><td><code>community/polyml-5.9.2-r0/usr/bin/poly</code></td></tr>
+<tr><td>304,780</td><td><code>community/matterbridge-1.26.0-r28/usr/bin/matterbridge</code></td></tr>
+<tr><td>300,020</td><td><code>community/coredns-1.12.3-r10/usr/bin/coredns</code></td></tr>
+<tr><td>297,049</td><td><code>community/llvm18-libs-18.1.8-r6/usr/lib/libLLVM.so.18.1</code></td></tr>
+<tr><td>297,049</td><td><code>community/llvm18-libs-18.1.8-r6/usr/lib/llvm18/lib/libLLVM.so.18.1</code></td></tr>
+<tr><td>295,855</td><td><code>community/kube-controller-manager-1.34.2-r6/usr/bin/kube-controller-manager</code></td></tr>
+<tr><td>295,545</td><td><code>community/blender-5.0.0-r0/usr/bin/blender</code></td></tr>
+<tr><td>295,089</td><td><code>community/py3-blender-5.0.0-r0/usr/lib/python3.12/site-packages/bpy.so</code></td></tr>
+<tr><td>293,614</td><td><code>community/gotosocial-0.20.2-r6/usr/bin/gotosocial</code></td></tr>
+<tr><td>290,834</td><td><code>community/singularity-4.3.5-r5/usr/bin/singularity</code></td></tr>
+<tr><td>290,453</td><td><code>community/blender-headless-5.0.0-r0/usr/bin/blender-headless</code></td></tr>
+<tr><td>289,467</td><td><code>community/webkit2gtk-4.1-2.48.1-r2/usr/lib/libwebkit2gtk-4.1.so.0.17.6</code></td></tr>
+<tr><td>289,467</td><td><code>community/webkit2gtk-4.1-2.48.1-r2/usr/lib/libwebkit2gtk-4.1.so.0</code></td></tr>
+<tr><td>288,381</td><td><code>community/webkit2gtk-6.0-2.48.1-r2/usr/lib/libwebkitgtk-6.0.so.4.11.6</code></td></tr>
+<tr><td>288,381</td><td><code>community/webkit2gtk-6.0-2.48.1-r2/usr/lib/libwebkitgtk-6.0.so.4</code></td></tr>
+<tr><td>282,217</td><td><code>community/docker-cli-buildx-0.30.1-r6/usr/libexec/docker/cli-plugins/docker-buildx</code></td></tr>
+<tr><td>280,543</td><td><code>community/singularity-4.3.5-r5/usr/libexec/singularity/bin/singularity-buildkitd</code></td></tr>
+<tr><td>279,352</td><td><code>community/typos-lsp-0.1.51-r0/usr/bin/typos-lsp</code></td></tr>
+<tr><td>278,875</td><td><code>community/golangci-lint-2.5.0-r6/usr/bin/golangci-lint</code></td></tr>
+<tr><td>278,318</td><td><code>main/clang20-libs-20.1.8-r1/usr/lib/libclang-cpp.so.20.1</code></td></tr></tbody></table>
+</section>
+
+</main>
+<footer>
+  <p>Generated by <code>scripts/build_site.py</code> from
+     <code>corpus/survey.json</code>,
+     <code>corpus/elflint_summary.json</code>, and
+     <code>corpus/dep_graph.json</code>.
+     Raw data: <a href="data.json">data.json</a>.</p>
+</footer>
+</body>
+</html>

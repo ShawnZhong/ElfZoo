@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Packages — ElfZoo corpus</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<header>
+  <h1><a href="index.html">ElfZoo</a> — Packages</h1>
+  <nav><a class="" href="index.html">Dashboard</a> · <a class="" href="categories.html">Categories</a> · <a class="" href="header.html">ELF Header</a> · <a class="" href="program.html">Program Headers</a> · <a class="" href="dynamic.html">Dynamic</a> · <a class="" href="relocations.html">Relocations</a> · <a class="" href="symbols.html">Symbols</a> · <a class="" href="notes.html">Notes &amp; Props</a> · <a class="" href="hardening.html">Hardening</a> · <a class="active" href="packages.html">Packages</a> · <a class="" href="needed.html">NEEDED graph</a> · <a class="" href="depgraph.html">Dep graph</a> · <a class="" href="anomalies.html">Survey anomalies</a> · <a class="" href="elflint.html">elflint findings</a></nav>
+  <p class="byline">Loadable bucket — 52,945 ELFs (82.8% of 63,950 total). See <a href="categories.html">Categories</a> for other buckets.</p>
+</header>
+<main>
+<section><h2>Most ELF-heavy packages (top 100)</h2>
+<table class="data sortable"><thead><tr><th>ELF files</th><th>package</th></tr></thead><tbody><tr><td>1,549</td><td>emacs-gtk3-nativecomp-30.2-r0</td></tr>
+<tr><td>1,548</td><td>emacs-x11-nativecomp-30.2-r0</td></tr>
+<tr><td>1,545</td><td>emacs-pgtk-nativecomp-30.2-r0</td></tr>
+<tr><td>465</td><td>grass-gis-8.4.1-r3</td></tr>
+<tr><td>383</td><td>lsp-plugins-1.2.25-r0</td></tr>
+<tr><td>376</td><td>vlc-3.0.21-r16</td></tr>
+<tr><td>363</td><td>netpbm-11.12.0-r0</td></tr>
+<tr><td>307</td><td>mesa-demos-9.0.0-r6</td></tr>
+<tr><td>307</td><td>asterisk-20.15.2-r1</td></tr>
+<tr><td>296</td><td>vtk-9.3.1-r2</td></tr>
+<tr><td>247</td><td>unrealircd-6.1.10-r0</td></tr>
+<tr><td>245</td><td>helix-tree-sitter-vendor-25.07.1-r1</td></tr>
+<tr><td>244</td><td>plan9port-0_git20241022-r2</td></tr>
+<tr><td>237</td><td>gnunet-0.26.1-r0</td></tr>
+<tr><td>218</td><td>krita-5.2.13-r1</td></tr>
+<tr><td>214</td><td>calligra-25.08.3-r4</td></tr>
+<tr><td>205</td><td>libindi-2.1.5.1-r1</td></tr>
+<tr><td>204</td><td>libreoffice-common-25.8.1.1-r5</td></tr>
+<tr><td>201</td><td>inspircd-4.8.0-r0</td></tr>
+<tr><td>191</td><td>lsp-plugins-vst2-1.2.25-r0</td></tr>
+<tr><td>176</td><td>gst-plugins-bad-1.26.9-r0</td></tr>
+<tr><td>174</td><td>llvm21-21.1.2-r1</td></tr>
+<tr><td>170</td><td>llvm20-20.1.8-r0</td></tr>
+<tr><td>166</td><td>darktable-5.2.0-r3</td></tr>
+<tr><td>166</td><td>digikam-8.8.0-r0</td></tr>
+<tr><td>166</td><td>llvm16-16.0.6-r13</td></tr>
+<tr><td>165</td><td>llvm15-15.0.7-r19</td></tr>
+<tr><td>159</td><td>charybdis-4.1.2-r7</td></tr>
+<tr><td>157</td><td>frei0r-plugins-2.4.0-r0</td></tr>
+<tr><td>157</td><td>openmpi-4.1.6-r1</td></tr>
+<tr><td>156</td><td>llvm19-19.1.7-r7</td></tr>
+<tr><td>155</td><td>llvm18-18.1.8-r6</td></tr>
+<tr><td>154</td><td>git-2.52.0-r0</td></tr>
+<tr><td>153</td><td>iptables-1.8.11-r1</td></tr>
+<tr><td>149</td><td>gimp-3.0.4-r1</td></tr>
+<tr><td>146</td><td>qt6-qtdeclarative-6.10.3-r0</td></tr>
+<tr><td>144</td><td>plasma-workspace-6.5.6-r1</td></tr>
+<tr><td>142</td><td>opencascade-7.9.2-r0</td></tr>
+<tr><td>141</td><td>tpm2-tools-5.7-r1</td></tr>
+<tr><td>138</td><td>texlive-2025.2-r0</td></tr>
+<tr><td>136</td><td>uhd-4.9.0.0-r0</td></tr>
+<tr><td>134</td><td>imagemagick-7.1.2.22-r0</td></tr>
+<tr><td>134</td><td>xscreensaver-gl-extras-6.11-r0</td></tr>
+<tr><td>130</td><td>openscenegraph-3.6.5-r17</td></tr>
+<tr><td>124</td><td>xscreensaver-extras-6.11-r0</td></tr>
+<tr><td>122</td><td>kyua-0.14.1-r0</td></tr>
+<tr><td>118</td><td>lmms-plugins-ladspa-1.2.2-r4</td></tr>
+<tr><td>116</td><td>ardour-8.12.0-r1</td></tr>
+<tr><td>113</td><td>py3-scipy-1.16.3-r0</td></tr>
+<tr><td>109</td><td>open-plc-utils-0_git20250712-r1</td></tr>
+<tr><td>102</td><td>kdepim-addons-25.08.3-r0</td></tr>
+<tr><td>102</td><td>coreutils-9.8-r1</td></tr>
+<tr><td>100</td><td>graphicsmagick-1.3.46-r0</td></tr>
+<tr><td>98</td><td>ceph18-base-18.2.7-r3</td></tr>
+<tr><td>94</td><td>ruby-libs-3.4.9-r0</td></tr>
+<tr><td>91</td><td>ceph19-base-19.2.3-r3</td></tr>
+<tr><td>91</td><td>kdevelop-25.08.3-r1</td></tr>
+<tr><td>91</td><td>kmymoney-5.2.1-r0</td></tr>
+<tr><td>91</td><td>freeswitch-1.10.12-r5</td></tr>
+<tr><td>91</td><td>samba-libs-4.22.8-r0</td></tr>
+<tr><td>90</td><td>util-linux-misc-2.41.4-r0</td></tr>
+<tr><td>89</td><td>apache2-2.4.67-r0</td></tr>
+<tr><td>87</td><td>spdk-25.05-r2</td></tr>
+<tr><td>85</td><td>audacity-3.7.5-r3</td></tr>
+<tr><td>85</td><td>dovecot-2.4.3-r1</td></tr>
+<tr><td>82</td><td>codeblocks-contrib-25.03-r0</td></tr>
+<tr><td>82</td><td>grommunio-gromox-3.0-r0</td></tr>
+<tr><td>81</td><td>nut-2.8.3-r4</td></tr>
+<tr><td>81</td><td>py3-samba-4.22.8-r0</td></tr>
+<tr><td>80</td><td>python3-3.12.13-r0</td></tr>
+<tr><td>80</td><td>strongswan-5.9.14-r3</td></tr>
+<tr><td>79</td><td>evolution-3.58.2-r0</td></tr>
+<tr><td>77</td><td>sg3_utils-1.48-r0</td></tr>
+<tr><td>77</td><td>saga-gis-9.10.2-r0</td></tr>
+<tr><td>77</td><td>mariadb-11.4.11-r0</td></tr>
+<tr><td>76</td><td>janus-gateway-1.3.3-r0</td></tr>
+<tr><td>75</td><td>pulseaudio-17.0-r5</td></tr>
+<tr><td>75</td><td>rocq-9.0.0-r1</td></tr>
+<tr><td>74</td><td>marble-25.08.3-r3</td></tr>
+<tr><td>74</td><td>sensorfw-0.15.1-r1</td></tr>
+<tr><td>74</td><td>tuxpaint-0.9.35-r0</td></tr>
+<tr><td>73</td><td>konqueror-25.08.3-r0</td></tr>
+<tr><td>71</td><td>gst-plugins-good-1.26.9-r0</td></tr>
+<tr><td>70</td><td>agensgraph-2.16.0-r0</td></tr>
+<tr><td>69</td><td>collectd-5.12.0-r24</td></tr>
+<tr><td>69</td><td>xen-4.20.3-r3</td></tr>
+<tr><td>68</td><td>scribus-1.6.4-r6</td></tr>
+<tr><td>68</td><td>kamailio-6.0.6-r1</td></tr>
+<tr><td>67</td><td>ghc-9.8.2-r2</td></tr>
+<tr><td>67</td><td>py3-scikit-learn-1.5.2-r0</td></tr>
+<tr><td>66</td><td>gammaray-3.3.0-r0</td></tr>
+<tr><td>66</td><td>zfs-scripts-2.4.1-r0</td></tr>
+<tr><td>65</td><td>openrc-0.63-r1</td></tr>
+<tr><td>64</td><td>audacious-plugins-4.4.2-r3</td></tr>
+<tr><td>64</td><td>gnuradio-3.10.12.0-r8</td></tr>
+<tr><td>64</td><td>rdma-core-60.0-r1</td></tr>
+<tr><td>63</td><td>freecad-1.0.2-r3</td></tr>
+<tr><td>62</td><td>py3-pyside6-6.9.1-r8</td></tr>
+<tr><td>62</td><td>graphviz-12.2.1-r0</td></tr>
+<tr><td>61</td><td>evolution-data-server-3.58.2-r0</td></tr></tbody></table>
+</section>
+<section><h2>Most reloc-heavy packages (top 100)</h2>
+<table class="data sortable"><thead><tr><th>relocations</th><th>package</th></tr></thead><tbody><tr><td>3,898,239</td><td>wireshark-common-4.6.5-r0</td></tr>
+<tr><td>1,972,833</td><td>chromium-148.0.7778.178-r0</td></tr>
+<tr><td>1,818,100</td><td>alloy-1.11.3-r6</td></tr>
+<tr><td>1,755,479</td><td>mimic1-1.3.0.1-r1</td></tr>
+<tr><td>1,606,392</td><td>llvm16-libs-16.0.6-r13</td></tr>
+<tr><td>1,526,232</td><td>llvm15-libs-15.0.7-r19</td></tr>
+<tr><td>1,495,136</td><td>llvm20-libs-20.1.8-r0</td></tr>
+<tr><td>1,331,379</td><td>telegraf-1.36.4-r6</td></tr>
+<tr><td>1,314,704</td><td>grafana-12.2.8-r0</td></tr>
+<tr><td>1,278,815</td><td>qt5-qtwebengine-5.15.17-r11</td></tr>
+<tr><td>1,238,355</td><td>rclone-1.72.1-r4</td></tr>
+<tr><td>1,196,213</td><td>mariadb-11.4.11-r0</td></tr>
+<tr><td>1,158,944</td><td>mimir-3.0.0-r6</td></tr>
+<tr><td>1,140,484</td><td>ghc-9.8.2-r2</td></tr>
+<tr><td>1,125,348</td><td>prometheus-3.5.3-r1</td></tr>
+<tr><td>1,085,245</td><td>clang16-libclang-16.0.6-r9</td></tr>
+<tr><td>1,041,660</td><td>clang20-libclang-20.1.8-r1</td></tr>
+<tr><td>1,033,648</td><td>qt6-qtwebengine-6.10.3-r3</td></tr>
+<tr><td>997,180</td><td>libreoffice-common-25.8.1.1-r5</td></tr>
+<tr><td>937,896</td><td>chromium-headless-shell-148.0.7778.178-r0</td></tr>
+<tr><td>908,954</td><td>ocaml5-5.4.0-r0</td></tr>
+<tr><td>901,476</td><td>vtk-9.3.1-r2</td></tr>
+<tr><td>885,881</td><td>ocaml-4.14.2-r2</td></tr>
+<tr><td>852,717</td><td>llvm16-16.0.6-r13</td></tr>
+<tr><td>852,224</td><td>libgeocoding-9.0.19-r0</td></tr>
+<tr><td>834,954</td><td>clang20-libs-20.1.8-r1</td></tr>
+<tr><td>815,095</td><td>mariadb-test-11.4.11-r0</td></tr>
+<tr><td>798,898</td><td>traefik-3.7.1-r0</td></tr>
+<tr><td>793,838</td><td>kicad-9.0.6-r0</td></tr>
+<tr><td>774,581</td><td>rocq-9.0.0-r1</td></tr>
+<tr><td>768,119</td><td>k3s-1.34.2.1-r6</td></tr>
+<tr><td>746,325</td><td>clang16-libs-16.0.6-r9</td></tr>
+<tr><td>720,692</td><td>libgo-15.2.0-r2</td></tr>
+<tr><td>719,864</td><td>llvm21-libs-21.1.2-r1</td></tr>
+<tr><td>717,024</td><td>clang19-libclang-19.1.7-r7</td></tr>
+<tr><td>697,748</td><td>clang18-libclang-18.1.8-r6</td></tr>
+<tr><td>685,119</td><td>git-2.52.0-r0</td></tr>
+<tr><td>673,646</td><td>clang16-extra-tools-16.0.6-r9</td></tr>
+<tr><td>661,547</td><td>gitea-1.24.6-r7</td></tr>
+<tr><td>658,490</td><td>llvm19-libs-19.1.7-r7</td></tr>
+<tr><td>657,597</td><td>forgejo-13.0.5-r4</td></tr>
+<tr><td>656,669</td><td>singularity-4.3.5-r5</td></tr>
+<tr><td>653,471</td><td>llvm18-18.1.8-r6</td></tr>
+<tr><td>652,548</td><td>ardour-8.12.0-r1</td></tr>
+<tr><td>649,828</td><td>webkit2gtk-4.1-2.48.1-r2</td></tr>
+<tr><td>648,169</td><td>forgejo-lts-11.0.13-r1</td></tr>
+<tr><td>647,635</td><td>webkit2gtk-6.0-2.48.1-r2</td></tr>
+<tr><td>603,030</td><td>k9s-0.50.16-r6</td></tr>
+<tr><td>599,372</td><td>llvm20-20.1.8-r0</td></tr>
+<tr><td>594,098</td><td>llvm18-libs-18.1.8-r6</td></tr>
+<tr><td>591,504</td><td>openbao-2.5.4-r0</td></tr>
+<tr><td>585,631</td><td>intel-graphics-compiler-2.14.1-r1</td></tr>
+<tr><td>548,260</td><td>docker-cli-compose-2.40.3-r6</td></tr>
+<tr><td>544,116</td><td>frr-10.5.3-r1</td></tr>
+<tr><td>533,052</td><td>clang18-extra-tools-18.1.8-r6</td></tr>
+<tr><td>531,517</td><td>loki-promtail-3.5.8-r6</td></tr>
+<tr><td>518,322</td><td>clang21-libs-21.1.2-r2</td></tr>
+<tr><td>512,071</td><td>thunderbird-145.0-r0</td></tr>
+<tr><td>508,392</td><td>loki-3.5.8-r6</td></tr>
+<tr><td>501,249</td><td>amazon-ssm-agent-3.3.3270.0-r6</td></tr>
+<tr><td>497,429</td><td>librewolf-144.0_p1-r0</td></tr>
+<tr><td>492,135</td><td>clang21-libclang-21.1.2-r2</td></tr>
+<tr><td>490,510</td><td>firefox-esr-140.11.0-r0</td></tr>
+<tr><td>488,418</td><td>hugo-0.152.2-r6</td></tr>
+<tr><td>481,425</td><td>scummvm-2.9.1-r1</td></tr>
+<tr><td>474,155</td><td>firefox-145.0-r0</td></tr>
+<tr><td>473,424</td><td>flite-2.2-r5</td></tr>
+<tr><td>461,730</td><td>clang19-libs-19.1.7-r7</td></tr>
+<tr><td>450,046</td><td>clang18-libs-18.1.8-r6</td></tr>
+<tr><td>449,346</td><td>gitlab-runner-18.11.2-r1</td></tr>
+<tr><td>445,699</td><td>victoria-metrics-backup-tools-1.122.8-r6</td></tr>
+<tr><td>445,196</td><td>llvm19-19.1.7-r7</td></tr>
+<tr><td>443,040</td><td>libgccjit-15.2.0-r2</td></tr>
+<tr><td>442,569</td><td>grype-0.104.1-r6</td></tr>
+<tr><td>441,929</td><td>zotero-7.0.32-r4</td></tr>
+<tr><td>441,732</td><td>libinkscape_base-1.4.2-r7</td></tr>
+<tr><td>437,403</td><td>mongodb-tools-100.13.0-r6</td></tr>
+<tr><td>428,390</td><td>lsp-plugins-1.2.25-r0</td></tr>
+<tr><td>423,117</td><td>flux-2.7.3-r6</td></tr>
+<tr><td>421,433</td><td>gomplate-4.3.3-r9</td></tr>
+<tr><td>414,302</td><td>freecad-1.0.2-r3</td></tr>
+<tr><td>412,317</td><td>apptainer-1.4.5-r5</td></tr>
+<tr><td>410,382</td><td>cosign-2.6.3-r1</td></tr>
+<tr><td>410,243</td><td>loki-logcli-3.5.8-r6</td></tr>
+<tr><td>409,684</td><td>texlive-2025.2-r0</td></tr>
+<tr><td>407,639</td><td>minio-0.20251015.172955-r6</td></tr>
+<tr><td>398,161</td><td>mariadb-backup-11.4.11-r0</td></tr>
+<tr><td>396,588</td><td>podman-5.7.0-r6</td></tr>
+<tr><td>393,599</td><td>docker-engine-29.5.1-r0</td></tr>
+<tr><td>391,802</td><td>krita-5.2.13-r1</td></tr>
+<tr><td>391,469</td><td>manticore-tools-7.4.6-r1</td></tr>
+<tr><td>383,624</td><td>netdata-go-plugins-1.47.5-r22</td></tr>
+<tr><td>378,228</td><td>lego-4.29.0-r6</td></tr>
+<tr><td>366,233</td><td>qt6-qtdeclarative-6.10.3-r0</td></tr>
+<tr><td>364,586</td><td>libfolia-2.21-r1</td></tr>
+<tr><td>364,192</td><td>geth-tools-1.17.0-r3</td></tr>
+<tr><td>364,005</td><td>telegram-desktop-6.3.4-r0</td></tr>
+<tr><td>357,799</td><td>opentofu-1.10.6-r8</td></tr>
+<tr><td>356,669</td><td>pulumi-3.204.0-r6</td></tr>
+<tr><td>355,606</td><td>miller-6.15.0-r8</td></tr></tbody></table>
+</section>
+<section><h2>Per-package summary</h2>
+
+<p>The full corpus is split across <strong>10,190</strong>
+packages. Median ELF files per package: <strong>2</strong>;
+99th percentile: <strong>60</strong>.</p>
+
+</section>
+
+</main>
+<footer>
+  <p>Generated by <code>scripts/build_site.py</code> from
+     <code>corpus/survey.json</code>,
+     <code>corpus/elflint_summary.json</code>, and
+     <code>corpus/dep_graph.json</code>.
+     Raw data: <a href="data.json">data.json</a>.</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hardening &amp; ABI — ElfZoo corpus</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<header>
+  <h1><a href="index.html">ElfZoo</a> — Hardening &amp; ABI</h1>
+  <nav><a class="" href="index.html">Dashboard</a> · <a class="" href="categories.html">Categories</a> · <a class="" href="header.html">ELF Header</a> · <a class="" href="program.html">Program Headers</a> · <a class="" href="dynamic.html">Dynamic</a> · <a class="" href="relocations.html">Relocations</a> · <a class="" href="symbols.html">Symbols</a> · <a class="" href="notes.html">Notes &amp; Props</a> · <a class="active" href="hardening.html">Hardening</a> · <a class="" href="packages.html">Packages</a> · <a class="" href="needed.html">NEEDED graph</a> · <a class="" href="depgraph.html">Dep graph</a> · <a class="" href="anomalies.html">Survey anomalies</a> · <a class="" href="elflint.html">elflint findings</a></nav>
+  <p class="byline">Loadable bucket — 52,945 ELFs (82.8% of 63,950 total). See <a href="categories.html">Categories</a> for other buckets.</p>
+</header>
+<main>
+<section><h2>Hardening at a glance (loadable only)</h2>
+<div class="grid"><div class="card"><div class="num">52,319</div><div class="lbl">BIND_NOW</div><div class="sub">98.8% — full RELRO</div></div>
+<div class="card"><div class="num">49</div><div class="lbl">CET IBT</div><div class="sub">0.09% — indirect-branch tracking</div></div>
+<div class="card"><div class="num">49</div><div class="lbl">CET SHSTK</div><div class="sub">0.09% — shadow stack</div></div>
+<div class="card"><div class="num">2</div><div class="lbl">TEXTREL</div><div class="sub">writable .text relocs — bad</div></div>
+<div class="card"><div class="num">4</div><div class="lbl">exec-stack</div><div class="sub">PT_GNU_STACK is RWX</div></div>
+<div class="card"><div class="num">43,877</div><div class="lbl">DT_RELR</div><div class="sub">compact RELATIVE relocs</div></div></div>
+</section>
+<section><h2>CET / GNU_PROPERTY_X86_FEATURE_1_AND</h2>
+<p>Indirect-branch tracking (IBT), shadow stack (SHSTK), and the LAM_U{48,57} markers. Distinct from <em>FEATURE_2</em> below, which describes register-class usage not security features.</p><table class="data sortable"><thead><tr><th>feature</th><th>count</th><th>share</th></tr></thead><tbody><tr><td>IBT</td><td>49</td><td>50.00%</td></tr>
+<tr><td>SHSTK</td><td>49</td><td>50.00%</td></tr></tbody></table>
+</section>
+<section><h2>x86-64 ISA level (GNU_PROPERTY_X86_ISA_1_NEEDED)</h2>
+<p>Minimum micro-architecture level the binary requires at load time. v2 = SSE4.2 + LAHF-SAHF, v3 = AVX2 + BMI, v4 = AVX-512.</p><div class="chart" style="height:280px"><canvas id="h_iso"></canvas></div><script>new Chart(document.getElementById("h_iso"),{"type": "doughnut", "data": {"labels": ["x86-64-baseline", "x86-64-v2", "x86-64-v3", "x86-64-v4"], "datasets": [{"data": [48896, 839, 496, 400], "backgroundColor": ["#3b6ea5", "#e07b3a", "#5d9b6c", "#a85a8e", "#7a7a7a", "#c9b237", "#5a8fb3", "#b35a5a", "#7d6ea0", "#56a39a", "#a39a56", "#9a56a3"]}]}, "options": {"responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"position": "right"}, "title": {"display": false, "text": ""}}}});</script><table class="data sortable"><thead><tr><th>ISA level</th><th>count</th><th>share</th></tr></thead><tbody><tr><td>x86-64-baseline</td><td>48,896</td><td>96.57%</td></tr>
+<tr><td>x86-64-v2</td><td>839</td><td>1.66%</td></tr>
+<tr><td>x86-64-v3</td><td>496</td><td>0.98%</td></tr>
+<tr><td>x86-64-v4</td><td>400</td><td>0.79%</td></tr></tbody></table>
+</section>
+<section><h2>x86 FEATURE_2 (used / needed)</h2>
+<p>From <code>GNU_PROPERTY_X86_FEATURE_2_USED</code> and <code>…_NEEDED</code>. Register-class fingerprint of the compiled code — orthogonal to CET.</p><table class="data sortable"><thead><tr><th>feature</th><th>count</th><th>share</th></tr></thead><tbody><tr><td>x86 (used)</td><td>50,622</td><td>53.68%</td></tr>
+<tr><td>XMM (used)</td><td>40,956</td><td>43.43%</td></tr>
+<tr><td>x87 (used)</td><td>850</td><td>0.90%</td></tr>
+<tr><td>YMM (used)</td><td>767</td><td>0.81%</td></tr>
+<tr><td>ZMM (used)</td><td>400</td><td>0.42%</td></tr>
+<tr><td>XSAVE (used)</td><td>318</td><td>0.34%</td></tr>
+<tr><td>&lt;unknown flags: 0x800&gt; (used)</td><td>260</td><td>0.28%</td></tr>
+<tr><td>MMX (used)</td><td>93</td><td>0.10%</td></tr>
+<tr><td>FXSR (used)</td><td>22</td><td>0.02%</td></tr>
+<tr><td>XSAVEOPT (used)</td><td>12</td><td>0.01%</td></tr></tbody></table>
+</section>
+<section><h2>AArch64 hardening (BTI / PAC)</h2>
+<p>AArch64-only properties. Empty here because we sampled only x86_64.</p><em>(none in this corpus)</em>
+</section>
+<section><h2>PT_GNU_STACK permissions</h2>
+<table class="data sortable"><thead><tr><th>flags</th><th>count</th><th>share</th></tr></thead><tbody><tr><td>RW</td><td>52,924</td><td>99.96%</td></tr>
+<tr><td>absent</td><td>17</td><td>0.03%</td></tr>
+<tr><td>RWX</td><td>4</td><td>0.01%</td></tr></tbody></table>
+</section>
+<section><h2>DT_RUNPATH / DT_RPATH patterns</h2>
+<p><code>$ORIGIN</code> = relative to the binary (reproducible); <code>absolute</code> = hard-coded absolute path; <code>relative-bare</code> = non-<code>$ORIGIN</code> relative path (rare; loader resolves against cwd).</p><table class="data sortable"><thead><tr><th>pattern</th><th>count</th><th>share</th></tr></thead><tbody><tr><td>absolute</td><td>5,311</td><td>67.70%</td></tr>
+<tr><td>$ORIGIN</td><td>2,510</td><td>31.99%</td></tr>
+<tr><td>relative-bare</td><td>24</td><td>0.31%</td></tr></tbody></table>
+</section>
+<section><h2>Build-ID size distribution</h2>
+<table class="data sortable"><thead><tr><th>size (bytes)</th><th>count</th><th>share</th></tr></thead><tbody><tr><td>20</td><td>52,779</td><td>100.00%</td></tr></tbody></table>
+</section>
+<section><h2>PT_LOAD alignment</h2>
+<table class="data sortable"><thead><tr><th>bytes</th><th>count</th><th>share</th></tr></thead><tbody><tr><td>4096</td><td>211,460</td><td>99.92%</td></tr>
+<tr><td>2097152</td><td>144</td><td>0.07%</td></tr>
+<tr><td>16384</td><td>17</td><td>0.01%</td></tr>
+<tr><td>32768</td><td>4</td><td>0.00%</td></tr>
+<tr><td>8192</td><td>2</td><td>0.00%</td></tr>
+<tr><td>8</td><td>1</td><td>0.00%</td></tr></tbody></table>
+</section>
+<section><h2>BSS ratio (memsz-vs-filesz in writable PT_LOAD)</h2>
+<p>How much of the writable segment lives only in memory (zeroed BSS). Very high ratios (>0.9) typically indicate large uninitialised globals or large COMMON.</p><table class="data sortable"><thead><tr><th>ratio bucket</th><th>count</th><th>share</th></tr></thead><tbody><tr><td>≤0.1</td><td>25,516</td><td>48.19%</td></tr>
+<tr><td>0.1-0.5</td><td>21,488</td><td>40.59%</td></tr>
+<tr><td>0.5-0.9</td><td>3,892</td><td>7.35%</td></tr>
+<tr><td>&gt;0.9</td><td>2,049</td><td>3.87%</td></tr></tbody></table>
+</section>
+<section><h2>SONAME presence</h2>
+<p><strong>18,144</strong> of 52,945 loadable ELFs declare DT_SONAME (34.3%).</p>
+</section>
+<section><h2>Highest symbol version per (lib, verset) (top 80 of 524)</h2>
+<p>The largest version any binary depends on for each (library, version-set) pair — the dependency-floor the corpus would require from each library.</p><table class="data sortable"><thead><tr><th>library</th><th>verset</th><th>max version</th></tr></thead><tbody><tr><td>libHX.so.32</td><td>LIBHX</td><td>4.28</td></tr>
+<tr><td>libLLVM-15.so</td><td>LLVM</td><td>15</td></tr>
+<tr><td>libLLVM-16.so</td><td>LLVM</td><td>16</td></tr>
+<tr><td>libLLVM.so.18.1</td><td>LLVM</td><td>18.1</td></tr>
+<tr><td>libLLVM.so.19.1</td><td>LLVM</td><td>19.1</td></tr>
+<tr><td>libLLVM.so.20.1</td><td>LLVM</td><td>20.1</td></tr>
+<tr><td>libLLVM.so.21.1</td><td>LLVM</td><td>21.1</td></tr>
+<tr><td>libMagickWand-7.Q16HDRI.so.10</td><td>VERS</td><td>10.0</td></tr>
+<tr><td>libOpenCL.so.1</td><td>OPENCL</td><td>2.2</td></tr>
+<tr><td>libQt53DAnimation.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt53DCore.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt53DExtras.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt53DInput.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt53DLogic.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt53DQuick.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt53DQuickAnimation.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt53DQuickExtras.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt53DQuickRender.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt53DQuickScene2D.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt53DRender.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Bluetooth.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Charts.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Concurrent.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Contacts.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Core.so.5</td><td>Qt</td><td>5.15</td></tr>
+<tr><td>libQt5DBus.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Designer.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Feedback.so.0</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Gamepad.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Gui.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Help.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Location.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Multimedia.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5MultimediaWidgets.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Network.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Nfc.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5OpenGL.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Organizer.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Pdf.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Positioning.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5PositioningQuick.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5PrintSupport.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5PublishSubscribe.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Qml.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5QmlModels.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5QmlWorkerScript.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Quick.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5QuickControls2.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5QuickTemplates2.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5QuickTest.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5QuickWidgets.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Script.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5ScriptTools.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Sensors.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5SerialBus.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5SerialPort.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5ServiceFramework.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Sql.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Svg.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5SystemInfo.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Test.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5TextToSpeech.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Versit.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5VersitOrganizer.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5VirtualKeyboard.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5WaylandClient.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5WaylandCompositor.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5WebChannel.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5WebEngine.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5WebEngineCore.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5WebEngineWidgets.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5WebSockets.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Widgets.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5X11Extras.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5Xml.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt5XmlPatterns.so.5</td><td>Qt</td><td>5</td></tr>
+<tr><td>libQt63DAnimation.so.6</td><td>Qt</td><td>6</td></tr>
+<tr><td>libQt63DCore.so.6</td><td>Qt</td><td>6</td></tr>
+<tr><td>libQt63DExtras.so.6</td><td>Qt</td><td>6</td></tr>
+<tr><td>libQt63DInput.so.6</td><td>Qt</td><td>6</td></tr></tbody></table>
+</section>
+
+</main>
+<footer>
+  <p>Generated by <code>scripts/build_site.py</code> from
+     <code>corpus/survey.json</code>,
+     <code>corpus/elflint_summary.json</code>, and
+     <code>corpus/dep_graph.json</code>.
+     Raw data: <a href="data.json">data.json</a>.</p>
+</footer>
+</body>
+</html>

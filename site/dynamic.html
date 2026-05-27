@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dynamic — ElfZoo corpus</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<header>
+  <h1><a href="index.html">ElfZoo</a> — Dynamic</h1>
+  <nav><a class="" href="index.html">Dashboard</a> · <a class="" href="categories.html">Categories</a> · <a class="" href="header.html">ELF Header</a> · <a class="" href="program.html">Program Headers</a> · <a class="active" href="dynamic.html">Dynamic</a> · <a class="" href="relocations.html">Relocations</a> · <a class="" href="symbols.html">Symbols</a> · <a class="" href="notes.html">Notes &amp; Props</a> · <a class="" href="hardening.html">Hardening</a> · <a class="" href="packages.html">Packages</a> · <a class="" href="needed.html">NEEDED graph</a> · <a class="" href="depgraph.html">Dep graph</a> · <a class="" href="anomalies.html">Survey anomalies</a> · <a class="" href="elflint.html">elflint findings</a></nav>
+  <p class="byline">Loadable bucket — 52,945 ELFs (82.8% of 63,950 total). See <a href="categories.html">Categories</a> for other buckets.</p>
+</header>
+<main>
+<section><h2>DT_* tag prevalence</h2>
+<table class="data sortable"><thead><tr><th>DT_tag</th><th>count</th><th>share</th></tr></thead><tbody><tr><td>NEEDED</td><td>238,731</td><td>15.92%</td></tr>
+<tr><td>STRTAB</td><td>52,828</td><td>3.52%</td></tr>
+<tr><td>SYMTAB</td><td>52,828</td><td>3.52%</td></tr>
+<tr><td>STRSZ</td><td>52,828</td><td>3.52%</td></tr>
+<tr><td>SYMENT</td><td>52,828</td><td>3.52%</td></tr>
+<tr><td>NULL</td><td>52,828</td><td>3.52%</td></tr>
+<tr><td>RELA</td><td>52,802</td><td>3.52%</td></tr>
+<tr><td>RELASZ</td><td>52,802</td><td>3.52%</td></tr>
+<tr><td>RELAENT</td><td>52,802</td><td>3.52%</td></tr>
+<tr><td>FLAGS_1</td><td>52,704</td><td>3.51%</td></tr>
+<tr><td>GNU_HASH</td><td>52,451</td><td>3.50%</td></tr>
+<tr><td>INIT</td><td>52,326</td><td>3.49%</td></tr>
+<tr><td>FINI</td><td>52,323</td><td>3.49%</td></tr>
+<tr><td>INIT_ARRAY</td><td>52,314</td><td>3.49%</td></tr>
+<tr><td>INIT_ARRAYSZ</td><td>52,314</td><td>3.49%</td></tr>
+<tr><td>FINI_ARRAY</td><td>52,306</td><td>3.49%</td></tr>
+<tr><td>FINI_ARRAYSZ</td><td>52,306</td><td>3.49%</td></tr>
+<tr><td>FLAGS</td><td>52,037</td><td>3.47%</td></tr>
+<tr><td>RELR</td><td>43,877</td><td>2.93%</td></tr>
+<tr><td>RELRSZ</td><td>43,877</td><td>2.93%</td></tr>
+<tr><td>RELRENT</td><td>43,877</td><td>2.93%</td></tr>
+<tr><td>PLTGOT</td><td>26,338</td><td>1.76%</td></tr>
+<tr><td>PLTRELSZ</td><td>26,263</td><td>1.75%</td></tr>
+<tr><td>PLTREL</td><td>26,263</td><td>1.75%</td></tr>
+<tr><td>JMPREL</td><td>26,263</td><td>1.75%</td></tr>
+<tr><td>VERSYM</td><td>23,963</td><td>1.60%</td></tr>
+<tr><td>VERNEED</td><td>23,591</td><td>1.57%</td></tr>
+<tr><td>VERNEEDNUM</td><td>23,591</td><td>1.57%</td></tr>
+<tr><td>DEBUG</td><td>19,140</td><td>1.28%</td></tr>
+<tr><td>SONAME</td><td>18,144</td><td>1.21%</td></tr>
+<tr><td>RELACOUNT</td><td>8,160</td><td>0.54%</td></tr>
+<tr><td>RUNPATH</td><td>6,792</td><td>0.45%</td></tr>
+<tr><td>VERDEF</td><td>2,831</td><td>0.19%</td></tr>
+<tr><td>VERDEFNUM</td><td>2,831</td><td>0.19%</td></tr>
+<tr><td>HASH</td><td>845</td><td>0.06%</td></tr>
+<tr><td>SYMBOLIC</td><td>299</td><td>0.02%</td></tr>
+<tr><td>BIND_NOW</td><td>282</td><td>0.02%</td></tr>
+<tr><td>RPATH</td><td>278</td><td>0.02%</td></tr>
+<tr><td>TEXTREL</td><td>2</td><td>0.00%</td></tr></tbody></table>
+</section>
+<section><h2>DT_FLAGS bits</h2>
+<table class="data sortable"><thead><tr><th>DF_*</th><th>count</th><th>share</th></tr></thead><tbody><tr><td>BIND_NOW</td><td>52,037</td><td>97.62%</td></tr>
+<tr><td>ORIGIN</td><td>754</td><td>1.41%</td></tr>
+<tr><td>SYMBOLIC</td><td>432</td><td>0.81%</td></tr>
+<tr><td>STATIC_TLS</td><td>78</td><td>0.15%</td></tr>
+<tr><td>TEXTREL</td><td>2</td><td>0.00%</td></tr></tbody></table>
+</section>
+<section><h2>DT_FLAGS_1 bits</h2>
+<table class="data sortable"><thead><tr><th>DF_1_*</th><th>count</th><th>share</th></tr></thead><tbody><tr><td>NOW</td><td>52,319</td><td>71.73%</td></tr>
+<tr><td>PIE</td><td>18,799</td><td>25.77%</td></tr>
+<tr><td>ORIGIN</td><td>900</td><td>1.23%</td></tr>
+<tr><td>NODELETE</td><td>698</td><td>0.96%</td></tr>
+<tr><td>NODUMP</td><td>213</td><td>0.29%</td></tr>
+<tr><td>INITFIRST</td><td>6</td><td>0.01%</td></tr>
+<tr><td>INTERPOSE</td><td>6</td><td>0.01%</td></tr></tbody></table>
+</section>
+<section><h2>Hash table style</h2>
+<div class="grid"><div class="card"><div class="num">51,983</div><div class="lbl">DT_GNU_HASH only</div><div class="sub">modern style</div></div>
+<div class="card"><div class="num">468</div><div class="lbl">Both DT_HASH + DT_GNU_HASH</div><div class="sub">legacy-compatible</div></div>
+<div class="card"><div class="num">377</div><div class="lbl">DT_HASH only</div><div class="sub">old style</div></div>
+<div class="card"><div class="num">0</div><div class="lbl">neither hash</div><div class="sub">dynamic but no hash table</div></div></div>
+</section>
+<section><h2>Symbol version tables</h2>
+<div class="grid"><div class="card"><div class="num">23,591</div><div class="lbl">DT_VERNEED present</div><div class="sub">44.6% of files</div></div>
+<div class="card"><div class="num">2,831</div><div class="lbl">DT_VERDEF present</div><div class="sub">5.3% of files</div></div>
+<div class="card"><div class="num">1,686</div><div class="lbl">distinct Vernaux entries</div><div class="sub">GLIBC_2.x, ABI_1.0, …</div></div></div>
+</section>
+<section><h2>Most-referenced version strings (top 40)</h2>
+<table class="data sortable"><thead><tr><th>version</th><th>count</th><th>share</th></tr></thead><tbody><tr><td>Qt_6</td><td>13,269</td><td>16.44%</td></tr>
+<tr><td>GCC_3.0</td><td>12,131</td><td>15.03%</td></tr>
+<tr><td>Qt_5</td><td>4,445</td><td>5.51%</td></tr>
+<tr><td>DPDK_25</td><td>3,401</td><td>4.21%</td></tr>
+<tr><td>Qt_6.10</td><td>3,026</td><td>3.75%</td></tr>
+<tr><td>OPENSSL_3.0.0</td><td>2,629</td><td>3.26%</td></tr>
+<tr><td>SAMBA_4.22.8_PRIVATE_SAMBA</td><td>2,579</td><td>3.20%</td></tr>
+<tr><td>Qt_5.15</td><td>1,610</td><td>1.99%</td></tr>
+<tr><td>GCC_3.3.1</td><td>1,553</td><td>1.92%</td></tr>
+<tr><td>INTERNAL</td><td>1,440</td><td>1.78%</td></tr>
+<tr><td>Qt_6.9</td><td>1,343</td><td>1.66%</td></tr>
+<tr><td>Qt_6_PRIVATE_API</td><td>1,257</td><td>1.56%</td></tr>
+<tr><td>LIBXML2_2.4.30</td><td>770</td><td>0.95%</td></tr>
+<tr><td>GCC_3.3</td><td>741</td><td>0.92%</td></tr>
+<tr><td>UDK_3_0_0</td><td>739</td><td>0.92%</td></tr>
+<tr><td>Qt_5_PRIVATE_API</td><td>722</td><td>0.89%</td></tr>
+<tr><td>ZLIB_1.2.0</td><td>693</td><td>0.86%</td></tr>
+<tr><td>GCC_4.2.0</td><td>654</td><td>0.81%</td></tr>
+<tr><td>LIBXML2_2.6.0</td><td>601</td><td>0.74%</td></tr>
+<tr><td>GCC_3.4</td><td>501</td><td>0.62%</td></tr>
+<tr><td>TALLOC_2.0.2</td><td>435</td><td>0.54%</td></tr>
+<tr><td>PNG16_0</td><td>404</td><td>0.50%</td></tr>
+<tr><td>OPENLDAP_2.200</td><td>380</td><td>0.47%</td></tr>
+<tr><td>UDK_3.1</td><td>376</td><td>0.47%</td></tr>
+<tr><td>LIBJPEG_8.0</td><td>355</td><td>0.44%</td></tr>
+<tr><td>SAMBA_UTIL_0.0.1</td><td>305</td><td>0.38%</td></tr>
+<tr><td>LLVM_21.1</td><td>281</td><td>0.35%</td></tr>
+<tr><td>LIBUDEV_183</td><td>270</td><td>0.33%</td></tr>
+<tr><td>ZLIB_1.2.9</td><td>270</td><td>0.33%</td></tr>
+<tr><td>UDK_3.3</td><td>262</td><td>0.32%</td></tr>
+<tr><td>libnl_3</td><td>261</td><td>0.32%</td></tr>
+<tr><td>LIBDBUS_1_3</td><td>251</td><td>0.31%</td></tr>
+<tr><td>SAMBA_ERRORS_1.0.0</td><td>226</td><td>0.28%</td></tr>
+<tr><td>UUID_1.0</td><td>224</td><td>0.28%</td></tr>
+<tr><td>GNUTLS_3_4</td><td>220</td><td>0.27%</td></tr>
+<tr><td>LLVM_20.1</td><td>216</td><td>0.27%</td></tr>
+<tr><td>V_0.5.0</td><td>212</td><td>0.26%</td></tr>
+<tr><td>LLVM_19.1</td><td>212</td><td>0.26%</td></tr>
+<tr><td>V0_1_0</td><td>211</td><td>0.26%</td></tr>
+<tr><td>LLVM_18.1</td><td>205</td><td>0.25%</td></tr></tbody></table>
+</section>
+<section><h2>Hardening</h2>
+<div class="grid"><div class="card"><div class="num">52,319</div><div class="lbl">BIND_NOW</div><div class="sub">98.8%</div></div>
+<div class="card"><div class="num">2</div><div class="lbl">TEXTREL</div><div class="sub">writable .text relocs</div></div>
+<div class="card"><div class="num">278</div><div class="lbl">DT_RPATH</div><div class="sub">legacy search path</div></div>
+<div class="card"><div class="num">6,792</div><div class="lbl">DT_RUNPATH</div><div class="sub">non-LD_LIBRARY_PATH search path</div></div>
+<div class="card"><div class="num">43,877</div><div class="lbl">DT_RELR</div><div class="sub">compact RELATIVE relocs</div></div>
+<div class="card"><div class="num">26,263</div><div class="lbl">DT_JMPREL</div><div class="sub">lazy-bind PLT relocations</div></div></div>
+</section>
+<section><h2>Loaders (PT_INTERP)</h2>
+<table class="data sortable"><thead><tr><th>interp path</th><th>count</th><th>share</th></tr></thead><tbody><tr><td>/lib/ld-musl-x86_64.so.1</td><td>19,076</td><td>99.76%</td></tr>
+<tr><td>/lib/klibc-9vLHAZcNKxq3B_Xm2VgObIOCxrU.so</td><td>35</td><td>0.18%</td></tr>
+<tr><td>/lib64/ld-linux-x86-64.so.2</td><td>10</td><td>0.05%</td></tr></tbody></table>
+</section>
+
+</main>
+<footer>
+  <p>Generated by <code>scripts/build_site.py</code> from
+     <code>corpus/survey.json</code>,
+     <code>corpus/elflint_summary.json</code>, and
+     <code>corpus/dep_graph.json</code>.
+     Raw data: <a href="data.json">data.json</a>.</p>
+</footer>
+</body>
+</html>
