@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# Unpack each .apk under corpus/mirror/<branch>/<repo>/<arch>/ into
-# corpus/unpacked/<branch>/<repo>/<arch>/<pkgname-version-rev>/.
+# Unpack each .apk under corpus/mirror/<repo>/ into
+# corpus/unpacked/<repo>/<pkgname-version-rev>/.
 #
 # Per-apk extraction directory (no merging) avoids file-path collisions
 # between packages that legitimately install to the same paths (virtual
 # providers, -dev subpackages, etc.).
 #
 # Usage:
-#   scripts/unpack.sh                 # default: v3.23, x86_64, main+community
-#   scripts/unpack.sh v3.23 x86_64 main
+#   scripts/unpack.sh                 # default: main + community
+#   scripts/unpack.sh main            # single repo
 #   JOBS=8 scripts/unpack.sh          # cap parallelism
 #
 # Idempotent: existing dirs with a .unpacked marker are skipped.
@@ -16,10 +16,6 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-BRANCH="${1:-v3.23}"
-ARCH="${2:-x86_64}"
-shift $(( $# > 0 ? 1 : 0 ))
-shift $(( $# > 0 ? 1 : 0 ))
 REPOS=("${@:-main community}")
 JOBS="${JOBS:-$(nproc)}"
 
@@ -47,7 +43,7 @@ unpack_apk() {
 export -f unpack_apk
 
 for repo in ${REPOS[*]}; do
-  src="$ROOT/corpus/mirror/$BRANCH/$repo/$ARCH"
+  src="$ROOT/corpus/mirror/$repo"
   if [[ ! -d "$src" ]]; then
     echo "skip $repo: $src does not exist"
     continue
@@ -59,11 +55,11 @@ for repo in ${REPOS[*]}; do
   find "$src" -maxdepth 1 -name '*.apk' -print0 \
     | xargs -0 -n1 -P "$JOBS" bash -c 'unpack_apk "$0"'
 
-  dst="$ROOT/corpus/unpacked/$BRANCH/$repo/$ARCH"
+  dst="$ROOT/corpus/unpacked/$repo"
   ok=$(find "$dst" -mindepth 2 -maxdepth 2 -name '.unpacked' 2>/dev/null | wc -l)
   echo "  $repo: $ok packages unpacked OK"
 done
 
 echo
-echo "unpacked tree at: $ROOT/corpus/unpacked/$BRANCH"
-du -sh "$ROOT/corpus/unpacked/$BRANCH" 2>/dev/null | sed 's/^/total: /'
+echo "unpacked tree at: $ROOT/corpus/unpacked"
+du -sh "$ROOT/corpus/unpacked" 2>/dev/null | sed 's/^/total: /'

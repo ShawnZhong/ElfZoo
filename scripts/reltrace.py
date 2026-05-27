@@ -203,7 +203,7 @@ def main():
     ap.add_argument("binary")
     ap.add_argument("--loader", default="/lib64/ld-linux-x86-64.so.2")
     ap.add_argument("--musl-dir",
-                    default="corpus/unpacked/v3.23/main/x86_64/musl-1.2.5-r23/lib")
+                    default="corpus/unpacked/main/musl-1.2.5-r23/lib")
     args = ap.parse_args()
 
     binary = str(Path(args.binary).resolve())

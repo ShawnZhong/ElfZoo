@@ -5,22 +5,21 @@ Per-ELF llvm-readobj JSON dump.
 For every ELF under one of the given package dirs, runs
 `llvm-readobj-20 --elf-output-style=JSON …` with an explicit set of
 section flags (avoiding `--all`, which produces invalid JSON), then
-writes the result to corpus/analysis/<branch>/<repo>/<arch>/<pkg>/<elf>.json.gz.
+writes the result to corpus/analysis/<repo>/<pkg>/<elf>.json.
 
 The output tree mirrors corpus/unpacked/ so any ELF at
-    corpus/unpacked/v3.23/main/x86_64/busybox-1.37.0-r30/bin/busybox
+    corpus/unpacked/main/busybox-1.37.0-r30/bin/busybox
 has its dump at
-    corpus/analysis/v3.23/main/x86_64/busybox-1.37.0-r30/bin/busybox.json.gz
+    corpus/analysis/main/busybox-1.37.0-r30/bin/busybox.json
 
 Usage:
     scripts/dump.py PKG_NAME [PKG_NAME ...]
     scripts/dump.py --all                                 # full corpus
-    scripts/dump.py --branch v3.23 --repo main busybox    # just one
+    scripts/dump.py --repo main busybox                   # one repo
 """
 from __future__ import annotations
 
 import argparse
-import gzip
 import json
 import multiprocessing as mp
 import os
@@ -121,7 +120,7 @@ def find_elfs(pkg_dir: Path):
 def dump_one(args):
     elf_path, in_root, out_root, readobj, force = args
     rel = elf_path.relative_to(in_root)
-    out = out_root / rel.with_name(rel.name + ".json.gz")
+    out = out_root / rel.with_name(rel.name + ".json")
     if not force and out.exists():
         return (elf_path, None)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -152,20 +151,17 @@ def dump_one(args):
     if err_path.exists():
         err_path.unlink()
 
-    with gzip.open(out, "wb", compresslevel=6) as f:
-        f.write(blob)
+    out.write_bytes(blob)
     return (elf_path, None)
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=str(Path(__file__).resolve().parent.parent))
-    ap.add_argument("--branch", default="v3.23")
     ap.add_argument("--repo", default="main",
                     help="repo (main/community). Multi-repo: pass --all.")
-    ap.add_argument("--arch", default="x86_64")
     ap.add_argument("--all", action="store_true",
-                    help="dump every ELF in main+community for the branch")
+                    help="dump every ELF in main+community")
     ap.add_argument("--jobs", type=int, default=os.cpu_count() or 1)
     ap.add_argument("--readobj", default="llvm-readobj-20")
     ap.add_argument("--force", action="store_true",
@@ -182,12 +178,12 @@ def main():
     pkg_dirs: list[Path] = []
     if args.all:
         for repo in ("main", "community"):
-            base = in_root / args.branch / repo / args.arch
+            base = in_root / repo
             if base.is_dir():
                 pkg_dirs.extend(d for d in sorted(base.iterdir())
                                 if d.is_dir() and (d / ".unpacked").exists())
     else:
-        base = in_root / args.branch / args.repo / args.arch
+        base = in_root / args.repo
         if not base.is_dir():
             sys.exit(f"no such dir: {base}")
         if not args.pkgs:
@@ -245,10 +241,10 @@ def main():
     # Size summary
     total = 0
     n = 0
-    for j in out_root.rglob("*.json.gz"):
+    for j in out_root.rglob("*.json"):
         total += j.stat().st_size
         n += 1
-    print(f"\nanalysis/ now: {n:,} json.gz files, "
+    print(f"\nanalysis/ now: {n:,} json files, "
           f"{total/1024/1024:.1f} MB total "
           f"({total/n if n else 0:.0f} bytes avg)")
 

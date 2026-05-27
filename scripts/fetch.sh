@@ -1,19 +1,22 @@
 #!/usr/bin/env bash
-# Fetch Alpine packages into corpus/mirror/<branch>/<repo>/<arch>/.
+# Fetch Alpine packages into corpus/mirror/<repo>/.
+#
+# Hard-pinned to Alpine v3.23 x86_64; ElfZoo only tracks a single
+# release / arch (see README §Scope). To target a different release or
+# arch, change ALPINE_BRANCH / ALPINE_ARCH below — and remember that
+# the analysis tree must be regenerated from scratch.
 #
 # Usage:
-#   scripts/fetch.sh                 # default: v3.23, main+community, x86_64
-#   scripts/fetch.sh v3.23 x86_64 main community
+#   scripts/fetch.sh                 # default: main + community
+#   scripts/fetch.sh main            # just one repo
 #
 # Idempotent — re-running only transfers changed files. Resumable
 # via rsync --partial. Verifies APKINDEX is present at the end.
 
 set -euo pipefail
 
-BRANCH="${1:-v3.23}"
-ARCH="${2:-x86_64}"
-shift $(( $# > 0 ? 1 : 0 ))
-shift $(( $# > 0 ? 1 : 0 ))
+ALPINE_BRANCH="${ALPINE_BRANCH:-v3.23}"
+ALPINE_ARCH="${ALPINE_ARCH:-x86_64}"
 REPOS=("${@:-main community}")
 
 # Allow override; defaults try a few known-good rsync mirrors in order.
@@ -30,7 +33,8 @@ DEST_ROOT="$ROOT/corpus/mirror"
 pick_mirror() {
   for m in "${MIRRORS[@]}"; do
     [[ -z "$m" ]] && continue
-    if timeout 10 rsync --list-only "$m/$BRANCH/main/$ARCH/APKINDEX.tar.gz" \
+    if timeout 10 rsync --list-only \
+         "$m/$ALPINE_BRANCH/main/$ALPINE_ARCH/APKINDEX.tar.gz" \
          >/dev/null 2>&1; then
       echo "$m"
       return 0
@@ -42,15 +46,15 @@ pick_mirror() {
 
 MIRROR="$(pick_mirror)"
 echo "mirror: $MIRROR"
-echo "branch: $BRANCH  arch: $ARCH  repos: ${REPOS[*]}"
+echo "release: $ALPINE_BRANCH $ALPINE_ARCH  repos: ${REPOS[*]}"
 
 for repo in ${REPOS[*]}; do
-  src="$MIRROR/$BRANCH/$repo/$ARCH/"
-  dst="$DEST_ROOT/$BRANCH/$repo/$ARCH/"
+  src="$MIRROR/$ALPINE_BRANCH/$repo/$ALPINE_ARCH/"
+  dst="$DEST_ROOT/$repo/"
   mkdir -p "$dst"
   echo
   echo "=== $repo ==="
-  # --partial-dir keeps interrupted transfers tidy under .partial/.
+  # --partial-dir keeps interrupted transfers tidy under .rsync-partial/.
   # --delete keeps the local mirror exactly matching upstream.
   # --info=progress2 gives one rolling progress line per repo.
   rsync -rlt \
@@ -70,4 +74,4 @@ for repo in ${REPOS[*]}; do
 done
 
 echo
-echo "done. corpus/mirror/$BRANCH at $(du -sh "$DEST_ROOT/$BRANCH" | cut -f1)."
+echo "done. corpus/mirror at $(du -sh "$DEST_ROOT" | cut -f1)."

@@ -92,7 +92,7 @@ def _priority(rec: dict[str, str]) -> int:
         return 0
 
 
-def load_index(branch: str, arch: str, repos: list[str]):
+def load_index(repos: list[str]):
     """Parse APKINDEXes; return (pkg_by_name, provider_by_tag, pkg_dir).
 
     Provider lists are sorted by (-provider_priority, name) so the
@@ -104,8 +104,8 @@ def load_index(branch: str, arch: str, repos: list[str]):
     provider_by_tag: dict[str, list[str]] = defaultdict(list)
     pkg_dir: dict[str, Path] = {}
     for repo in repos:
-        idx = CORPUS / "mirror" / branch / repo / arch / "APKINDEX.tar.gz"
-        unpacked_root = CORPUS / "unpacked" / branch / repo / arch
+        idx = CORPUS / "mirror" / repo / "APKINDEX.tar.gz"
+        unpacked_root = CORPUS / "unpacked" / repo
         if not idx.is_file():
             print(f"warning: missing {idx}", file=sys.stderr)
             continue
@@ -236,8 +236,6 @@ def materialize(pkgs, pkg_dir, out_dir: Path, *, on_conflict="error"):
 def main():
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--branch", default="v3.23")
-    p.add_argument("--arch", default="x86_64")
     p.add_argument("--repo", action="append",
                    help="Repos to load (default: main, community)")
     p.add_argument("--out", help="Sysroot output dir "
@@ -253,10 +251,8 @@ def main():
     args = p.parse_args()
 
     repos = args.repo or ["main", "community"]
-    print(f"loading APKINDEX for {args.branch}/{args.arch} {repos} …",
-          file=sys.stderr)
-    pkg_by_name, provider_by_tag, pkg_dir = load_index(
-        args.branch, args.arch, repos)
+    print(f"loading APKINDEX for {repos} …", file=sys.stderr)
+    pkg_by_name, provider_by_tag, pkg_dir = load_index(repos)
     print(f"  {len(pkg_by_name)} packages, "
           f"{len(provider_by_tag)} provider tags",
           file=sys.stderr)
