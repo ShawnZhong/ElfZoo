@@ -194,6 +194,111 @@
 <section><h2>Versioned-symbol mismatches</h2>
 <p><strong>None.</strong> For every <code>(soname, verset)</code> requested via DT_VERNEED, some in-corpus provider of that SONAME declares that verset via DT_VERDEF. The corpus is self-consistent on versioned-symbol presence (modulo external sonames, which by construction can’t be checked here).</p>
 </section>
+<section><h2>NEEDED uniqueness (intra-array)</h2>
+<p><strong>0 of 51,778</strong> consumers list the same SONAME twice in a single <code>DT_NEEDED</code> array. The gABI says nothing about uniqueness — <em>"the dynamic array may contain multiple entries with this type; their relative order is significant, though it is unspecified how the dynamic linker processes them"</em> (gabi 07 § Dynamic Section) — yet every linker in the corpus dedupes producers, every consumer is dup-free, and <code>eu-elflint</code> flags the duplicate-NEEDED template (which fires zero times). The spec is descriptively too weak here: tightening to <em>pairwise-distinct sonames</em> within one DT array would cost zero compatibility and would let a loader prove a witness at parse time instead of leaving the case to runtime.</p>
+</section>
+<section><h2>Transitive-closure duplication (diamond NEEDED edges)</h2>
+<p><strong>37,718 of 51,773</strong> consumers (72.9%) have at least one <em>diamond</em> in their resolved closure — i.e. a DSO reachable via two or more distinct <code>NEEDED</code> edges. Across the corpus that is 3,658,299 redundant edges that a naive tree-walk would re-visit. Unlike intra-NEEDED duplication, this redundancy is <strong>load-bearing</strong>: glibc rtld (<code>elf/dl-deps.c::_dl_map_object_deps</code>) and musl ldso (<code>ldso/dynlink.c::load_deps</code>) both build the link map by FIFO BFS over <code>DT_NEEDED</code> in array order, first-seen wins. Adding or removing an edge promotes a DSO one BFS level earlier or later, which directly changes which definition wins on overlapping symbols (see next section). gABI codifies neither the BFS algorithm nor the first-seen rule, but every loader implements both.</p><div class="chart" style="height:260px"><canvas id="g_trans_hist"></canvas></div><script>new Chart(document.getElementById("g_trans_hist"),{"type": "bar", "data": {"labels": ["1", "2", "3-5", "6-10", "11-20", "21-50", "51-100", "101-200", "201-500", "501-1000", "1001-10000"], "datasets": [{"label": "consumers grouped by #redundant edges", "data": [4143, 2452, 5557, 3227, 3778, 5217, 3454, 3837, 4418, 1437, 198], "backgroundColor": "#3b6ea5", "borderRadius": 2}]}, "options": {"indexAxis": "x", "responsive": true, "maintainAspectRatio": false, "plugins": {"legend": {"display": false}, "title": {"display": true, "text": "consumers grouped by #redundant edges"}}, "scales": {"x": {"ticks": {"autoSkip": true}}}}});</script><h3>Top 25 by absolute redundant edges</h3><table class="data sortable"><thead><tr><th>extra</th><th>nodes</th><th>edges</th><th>ratio</th><th>file</th></tr></thead><tbody><tr><td>1,644</td><td>297</td><td>1,941</td><td>84.7%</td><td><code>community/kmail-25.08.3-r0/usr/bin/kmail</code></td></tr>
+<tr><td>1,639</td><td>336</td><td>1,975</td><td>83.0%</td><td><code>community/kdepim-addons-25.08.3-r0/usr/lib/qt6/plugins/pim6/messageviewer/bodypartformatter/messageviewer_bodypartformatter_semantic.so</code></td></tr>
+<tr><td>1,629</td><td>296</td><td>1,925</td><td>84.6%</td><td><code>community/kmail-25.08.3-r0/usr/lib/qt6/plugins/kmailpart.so</code></td></tr>
+<tr><td>1,612</td><td>295</td><td>1,907</td><td>84.5%</td><td><code>community/kmail-25.08.3-r0/usr/lib/qt6/plugins/pim6/kcms/kmail/kcm_kmail_security.so</code></td></tr>
+<tr><td>1,612</td><td>295</td><td>1,907</td><td>84.5%</td><td><code>community/kmail-25.08.3-r0/usr/lib/qt6/plugins/pim6/kcms/kmail/kcm_kmail_plugins.so</code></td></tr>
+<tr><td>1,612</td><td>295</td><td>1,907</td><td>84.5%</td><td><code>community/kmail-25.08.3-r0/usr/lib/qt6/plugins/pim6/kcms/kmail/kcm_kmail_misc.so</code></td></tr>
+<tr><td>1,612</td><td>295</td><td>1,907</td><td>84.5%</td><td><code>community/kmail-25.08.3-r0/usr/lib/qt6/plugins/pim6/kcms/kmail/kcm_kmail_composer.so</code></td></tr>
+<tr><td>1,612</td><td>295</td><td>1,907</td><td>84.5%</td><td><code>community/kmail-25.08.3-r0/usr/lib/qt6/plugins/pim6/kcms/kmail/kcm_kmail_appearance.so</code></td></tr>
+<tr><td>1,612</td><td>295</td><td>1,907</td><td>84.5%</td><td><code>community/kmail-25.08.3-r0/usr/lib/qt6/plugins/pim6/kcms/kmail/kcm_kmail_accounts.so</code></td></tr>
+<tr><td>1,607</td><td>294</td><td>1,901</td><td>84.5%</td><td><code>community/kmail-25.08.3-r0/usr/lib/libkmailprivate.so.6.5.3</code></td></tr>
+<tr><td>1,607</td><td>294</td><td>1,901</td><td>84.5%</td><td><code>community/kmail-25.08.3-r0/usr/lib/libkmailprivate.so.6</code></td></tr>
+<tr><td>1,578</td><td>292</td><td>1,870</td><td>84.4%</td><td><code>community/korganizer-25.08.3-r0/usr/bin/korganizer</code></td></tr>
+<tr><td>1,554</td><td>290</td><td>1,844</td><td>84.3%</td><td><code>community/korganizer-25.08.3-r0/usr/lib/qt6/plugins/korganizerpart.so</code></td></tr>
+<tr><td>1,543</td><td>289</td><td>1,832</td><td>84.2%</td><td><code>community/korganizer-25.08.3-r0/usr/lib/qt6/plugins/pim6/kcms/korganizer/korganizer_configtime.so</code></td></tr>
+<tr><td>1,540</td><td>290</td><td>1,830</td><td>84.2%</td><td><code>community/korganizer-25.08.3-r0/usr/lib/qt6/plugins/pim6/kcms/korganizer/korganizer_userfeedback.so</code></td></tr>
+<tr><td>1,525</td><td>288</td><td>1,813</td><td>84.1%</td><td><code>community/korganizer-25.08.3-r0/usr/lib/libkorganizerprivate.so.6.5.3</code></td></tr>
+<tr><td>1,525</td><td>288</td><td>1,813</td><td>84.1%</td><td><code>community/korganizer-25.08.3-r0/usr/lib/libkorganizerprivate.so.6</code></td></tr>
+<tr><td>1,497</td><td>288</td><td>1,785</td><td>83.9%</td><td><code>community/merkuro-25.08.3-r3/usr/bin/merkuro-mail</code></td></tr>
+<tr><td>1,494</td><td>286</td><td>1,780</td><td>83.9%</td><td><code>community/korganizer-25.08.3-r0/usr/lib/qt6/plugins/pim6/kcms/korganizer/korganizer_configgroupscheduling.so</code></td></tr>
+<tr><td>1,493</td><td>285</td><td>1,778</td><td>84.0%</td><td><code>community/kdepim-addons-25.08.3-r0/usr/lib/qt6/plugins/pim6/messageviewer/bodypartformatter/messageviewer_bodypartformatter_text_calendar.so</code></td></tr>
+<tr><td>1,483</td><td>285</td><td>1,768</td><td>83.9%</td><td><code>community/kdepim-addons-25.08.3-r0/usr/lib/qt6/plugins/pim6/messageviewer/viewerplugin/messageviewer_createtodoplugin.so</code></td></tr>
+<tr><td>1,483</td><td>285</td><td>1,768</td><td>83.9%</td><td><code>community/kdepim-addons-25.08.3-r0/usr/lib/qt6/plugins/pim6/messageviewer/viewerplugin/messageviewer_createeventplugin.so</code></td></tr>
+<tr><td>1,465</td><td>284</td><td>1,749</td><td>83.8%</td><td><code>community/incidenceeditor-25.08.3-r0/usr/lib/libKPim6IncidenceEditor.so.6.5.3</code></td></tr>
+<tr><td>1,465</td><td>284</td><td>1,749</td><td>83.8%</td><td><code>community/incidenceeditor-25.08.3-r0/usr/lib/libKPim6IncidenceEditor.so.6</code></td></tr>
+<tr><td>1,456</td><td>285</td><td>1,741</td><td>83.6%</td><td><code>community/korganizer-25.08.3-r0/usr/lib/qt6/plugins/pim6/kcms/korganizer/korganizer_configcolorsandfonts.so</code></td></tr></tbody></table><h3>Top 25 by redundancy ratio (closures ≥ 50 edges)</h3><table class="data sortable"><thead><tr><th>ratio</th><th>extra</th><th>nodes</th><th>edges</th><th>file</th></tr></thead><tbody><tr><td>91.1%</td><td>336</td><td>33</td><td>369</td><td><code>community/ghc-9.8.2-r2/usr/lib/ghc-9.8.2/bin/haddock-ghc-9.8.2</code></td></tr>
+<tr><td>91.1%</td><td>336</td><td>33</td><td>369</td><td><code>community/ghc-9.8.2-r2/usr/lib/ghc-9.8.2/bin/haddock</code></td></tr>
+<tr><td>91.0%</td><td>272</td><td>27</td><td>299</td><td><code>community/ghc-9.8.2-r2/usr/lib/ghc-9.8.2/lib/x86_64-linux-ghc-9.8.2/libHSghc-9.8.2-inplace-ghc9.8.2.so</code></td></tr>
+<tr><td>91.0%</td><td>332</td><td>33</td><td>365</td><td><code>community/ghc-9.8.2-r2/usr/lib/ghc-9.8.2/bin/ghc-9.8.2</code></td></tr>
+<tr><td>91.0%</td><td>332</td><td>33</td><td>365</td><td><code>community/ghc-9.8.2-r2/usr/lib/ghc-9.8.2/bin/ghc</code></td></tr>
+<tr><td>90.8%</td><td>256</td><td>26</td><td>282</td><td><code>community/uusi-0.4.3-r0/usr/lib/libHSuusi-0.4.3.0-CyIYs61dxqrDPna1tqg5gC-ghc9.8.2.so</code></td></tr>
+<tr><td>90.8%</td><td>285</td><td>29</td><td>314</td><td><code>community/uusi-0.4.3-r0/usr/bin/uusi</code></td></tr>
+<tr><td>90.6%</td><td>280</td><td>29</td><td>309</td><td><code>community/ghc-9.8.2-r2/usr/lib/ghc-9.8.2/bin/ghc-pkg-9.8.2</code></td></tr>
+<tr><td>90.6%</td><td>280</td><td>29</td><td>309</td><td><code>community/ghc-9.8.2-r2/usr/lib/ghc-9.8.2/bin/ghc-pkg</code></td></tr>
+<tr><td>90.2%</td><td>259</td><td>28</td><td>287</td><td><code>community/uusi-0.4.3-r0/usr/bin/gen-setup</code></td></tr>
+<tr><td>90.2%</td><td>231</td><td>25</td><td>256</td><td><code>community/ghc-9.8.2-r2/usr/lib/ghc-9.8.2/lib/x86_64-linux-ghc-9.8.2/libHSCabal-3.10.2.0-inplace-ghc9.8.2.so</code></td></tr>
+<tr><td>89.3%</td><td>218</td><td>26</td><td>244</td><td><code>community/ghc-9.8.2-r2/usr/lib/ghc-9.8.2/bin/ghc-iserv-dyn</code></td></tr>
+<tr><td>89.3%</td><td>218</td><td>26</td><td>244</td><td><code>community/ghc-9.8.2-r2/usr/lib/ghc-9.8.2/bin/ghc-iserv-dyn-ghc-9.8.2</code></td></tr>
+<tr><td>89.3%</td><td>218</td><td>26</td><td>244</td><td><code>community/ghc-9.8.2-r2/usr/lib/ghc-9.8.2/lib/bin/ghc-iserv-dyn</code></td></tr>
+<tr><td>89.3%</td><td>1,247</td><td>149</td><td>1,396</td><td><code>main/samba-test-4.22.8-r0/usr/bin/smbtorture</code></td></tr>
+<tr><td>89.3%</td><td>192</td><td>23</td><td>215</td><td><code>community/ghc-9.8.2-r2/usr/lib/ghc-9.8.2/lib/x86_64-linux-ghc-9.8.2/libHSghci-9.8.2-inplace-ghc9.8.2.so</code></td></tr>
+<tr><td>89.1%</td><td>189</td><td>23</td><td>212</td><td><code>community/ghc-9.8.2-r2/usr/lib/ghc-9.8.2/lib/x86_64-linux-ghc-9.8.2/libHSCabal-syntax-3.10.2.0-inplace-ghc9.8.2.so</code></td></tr>
+<tr><td>88.6%</td><td>1,043</td><td>134</td><td>1,177</td><td><code>main/samba-server-4.22.8-r0/usr/lib/samba/rpcd_classic</code></td></tr>
+<tr><td>88.4%</td><td>160</td><td>21</td><td>181</td><td><code>community/ghc-9.8.2-r2/usr/lib/ghc-9.8.2/lib/x86_64-linux-ghc-9.8.2/libHSghc-boot-9.8.2-inplace-ghc9.8.2.so</code></td></tr>
+<tr><td>88.4%</td><td>997</td><td>131</td><td>1,128</td><td><code>main/samba-server-4.22.8-r0/usr/lib/samba/rpcd_lsad</code></td></tr>
+<tr><td>88.3%</td><td>174</td><td>23</td><td>197</td><td><code>community/ghc-9.8.2-r2/usr/lib/ghc-9.8.2/lib/x86_64-linux-ghc-9.8.2/libHShaskeline-0.8.2.1-inplace-ghc9.8.2.so</code></td></tr>
+<tr><td>88.3%</td><td>1,006</td><td>133</td><td>1,139</td><td><code>main/samba-common-tools-4.22.8-r0/usr/bin/net</code></td></tr>
+<tr><td>88.2%</td><td>991</td><td>132</td><td>1,123</td><td><code>main/samba-server-4.22.8-r0/usr/lib/samba/rpcd_spoolss</code></td></tr>
+<tr><td>88.2%</td><td>435</td><td>58</td><td>493</td><td><code>community/opencascade-7.9.2-r0/usr/lib/libTKQADraw.so.7.9.2</code></td></tr>
+<tr><td>88.2%</td><td>435</td><td>58</td><td>493</td><td><code>community/opencascade-7.9.2-r0/usr/lib/libTKQADraw.so.7.9</code></td></tr></tbody></table>
+</section>
+<section><h2>Symbol shadowing — direct dep vs transitive dep</h2>
+<p><strong>26,193 of 28,870</strong> consumers (90.7%) with both direct and transitive-only providers in their closure export at least one symbol from <em>both</em> sides. Under the BFS first-seen rule the direct provider always wins; the transitive definition is reachable only via <code>dlsym(handle, …)</code> or <code>RTLD_NEXT</code>. Across the corpus we count 1,574,711 total shadowed-symbol pairs.</p><p>This is exactly the zone where the (unwritten) BFS link-map rule has observable static consequences. Two real-world coping strategies are visible in the corpus: <strong>GHC</strong> binaries re-<code>NEEDED</code> every transitively-used Hackage package directly, driving shadow counts to <strong>zero</strong>; <strong>Qt/KDE plugins</strong> emit one explicit <code>NEEDED</code> per transitively-used Qt module so the host <code>dlopen</code>’s scope is deterministic. Both patterns trade DT_NEEDED list size for resolution determinism.</p><p>Common shadowed-symbol families seen in the top-25 symbol table: libc startup hooks (<code>_init</code>, <code>_fini</code>) — defined by every DSO but resolved per-link-map via DT_INIT/DT_FINI, not via global scope — and the GNU gettext shim symbols (<code>gettext</code>, <code>dgettext</code>, <code>bindtextdomain</code>, …) which appear both in <code>libc.musl-x86_64.so.1</code> and in <code>libintl</code>-style shims.</p><h3>Top 25 consumers by #shadowed symbols</h3><table class="data sortable"><thead><tr><th>#shadow</th><th>#direct</th><th>#transitive</th><th>file</th></tr></thead><tbody><tr><td>4,022</td><td>6</td><td>71</td><td><code>community/py3-pyarrow-21.0.0-r4/usr/lib/python3.12/site-packages/pyarrow/_dataset_parquet.cpython-312-x86_64-linux-musl.so</code></td></tr>
+<tr><td>4,022</td><td>6</td><td>71</td><td><code>community/py3-pyarrow-21.0.0-r4/usr/lib/python3.12/site-packages/pyarrow/_dataset.cpython-312-x86_64-linux-musl.so</code></td></tr>
+<tr><td>3,627</td><td>12</td><td>125</td><td><code>community/freecad-1.0.2-r3/usr/lib/CAMSimulator.so</code></td></tr>
+<tr><td>3,370</td><td>13</td><td>72</td><td><code>community/freecad-1.0.2-r3/usr/lib/PathSimulator.so</code></td></tr>
+<tr><td>3,276</td><td>24</td><td>113</td><td><code>community/freecad-1.0.2-r3/usr/lib/MeshPartGui.so</code></td></tr>
+<tr><td>3,237</td><td>23</td><td>87</td><td><code>community/freecad-1.0.2-r3/usr/lib/MeshPart.so</code></td></tr>
+<tr><td>3,220</td><td>6</td><td>66</td><td><code>community/py3-pyarrow-21.0.0-r4/usr/lib/python3.12/site-packages/pyarrow/_acero.cpython-312-x86_64-linux-musl.so</code></td></tr>
+<tr><td>3,187</td><td>15</td><td>66</td><td><code>community/freecad-1.0.2-r3/usr/lib/ReverseEngineering.so</code></td></tr>
+<tr><td>3,161</td><td>7</td><td>69</td><td><code>community/py3-pyarrow-21.0.0-r4/usr/lib/python3.12/site-packages/pyarrow/_parquet_encryption.cpython-312-x86_64-linux-musl.so</code></td></tr>
+<tr><td>3,161</td><td>6</td><td>69</td><td><code>community/py3-pyarrow-21.0.0-r4/usr/lib/python3.12/site-packages/pyarrow/libarrow_python_parquet_encryption.so.2100.0.0</code></td></tr>
+<tr><td>3,161</td><td>6</td><td>69</td><td><code>community/py3-pyarrow-21.0.0-r4/usr/lib/python3.12/site-packages/pyarrow/libarrow_python_parquet_encryption.so.2100</code></td></tr>
+<tr><td>3,161</td><td>6</td><td>69</td><td><code>community/py3-pyarrow-21.0.0-r4/usr/lib/python3.12/site-packages/pyarrow/libarrow_python_parquet_encryption.so</code></td></tr>
+<tr><td>3,161</td><td>6</td><td>69</td><td><code>community/py3-pyarrow-21.0.0-r4/usr/lib/python3.12/site-packages/pyarrow/_parquet.cpython-312-x86_64-linux-musl.so</code></td></tr>
+<tr><td>3,138</td><td>12</td><td>67</td><td><code>community/freecad-1.0.2-r3/usr/lib/flatmesh.so</code></td></tr>
+<tr><td>3,115</td><td>7</td><td>103</td><td><code>community/py3-pyarrow-21.0.0-r4/usr/lib/python3.12/site-packages/pyarrow/_flight.cpython-312-x86_64-linux-musl.so</code></td></tr>
+<tr><td>3,115</td><td>6</td><td>103</td><td><code>community/py3-pyarrow-21.0.0-r4/usr/lib/python3.12/site-packages/pyarrow/libarrow_python_flight.so.2100.0.0</code></td></tr>
+<tr><td>3,115</td><td>6</td><td>103</td><td><code>community/py3-pyarrow-21.0.0-r4/usr/lib/python3.12/site-packages/pyarrow/libarrow_python_flight.so.2100</code></td></tr>
+<tr><td>3,115</td><td>6</td><td>103</td><td><code>community/py3-pyarrow-21.0.0-r4/usr/lib/python3.12/site-packages/pyarrow/libarrow_python_flight.so</code></td></tr>
+<tr><td>3,111</td><td>5</td><td>66</td><td><code>community/py3-pyarrow-21.0.0-r4/usr/lib/python3.12/site-packages/pyarrow/lib.cpython-312-x86_64-linux-musl.so</code></td></tr>
+<tr><td>3,111</td><td>5</td><td>66</td><td><code>community/py3-pyarrow-21.0.0-r4/usr/lib/python3.12/site-packages/pyarrow/_orc.cpython-312-x86_64-linux-musl.so</code></td></tr>
+<tr><td>3,111</td><td>5</td><td>66</td><td><code>community/py3-pyarrow-21.0.0-r4/usr/lib/python3.12/site-packages/pyarrow/_json.cpython-312-x86_64-linux-musl.so</code></td></tr>
+<tr><td>3,111</td><td>5</td><td>66</td><td><code>community/py3-pyarrow-21.0.0-r4/usr/lib/python3.12/site-packages/pyarrow/_hdfs.cpython-312-x86_64-linux-musl.so</code></td></tr>
+<tr><td>3,111</td><td>5</td><td>66</td><td><code>community/py3-pyarrow-21.0.0-r4/usr/lib/python3.12/site-packages/pyarrow/_fs.cpython-312-x86_64-linux-musl.so</code></td></tr>
+<tr><td>3,111</td><td>5</td><td>66</td><td><code>community/py3-pyarrow-21.0.0-r4/usr/lib/python3.12/site-packages/pyarrow/_feather.cpython-312-x86_64-linux-musl.so</code></td></tr>
+<tr><td>3,111</td><td>5</td><td>66</td><td><code>community/py3-pyarrow-21.0.0-r4/usr/lib/python3.12/site-packages/pyarrow/_csv.cpython-312-x86_64-linux-musl.so</code></td></tr></tbody></table><h3>Top 25 most-shadowed symbols (across consumers)</h3><table class="data sortable"><thead><tr><th>#consumers</th><th>symbol</th></tr></thead><tbody><tr><td>25,970</td><td><code>_fini</code></td></tr>
+<tr><td>25,970</td><td><code>_init</code></td></tr>
+<tr><td>11,079</td><td><code>dcngettext</code></td></tr>
+<tr><td>11,079</td><td><code>dcgettext</code></td></tr>
+<tr><td>11,079</td><td><code>dgettext</code></td></tr>
+<tr><td>11,079</td><td><code>bindtextdomain</code></td></tr>
+<tr><td>11,079</td><td><code>ngettext</code></td></tr>
+<tr><td>11,079</td><td><code>dngettext</code></td></tr>
+<tr><td>11,079</td><td><code>textdomain</code></td></tr>
+<tr><td>11,079</td><td><code>gettext</code></td></tr>
+<tr><td>11,079</td><td><code>bind_textdomain_codeset</code></td></tr>
+<tr><td>5,270</td><td><code>_ZNSt12placeholders2_1E</code></td></tr>
+<tr><td>5,210</td><td><code>_ZTISt16_Sp_counted_baseILN9__gnu_cxx12_Lock_policyE2EE</code></td></tr>
+<tr><td>5,210</td><td><code>_ZTSSt11_Mutex_baseILN9__gnu_cxx12_Lock_policyE2EE</code></td></tr>
+<tr><td>5,210</td><td><code>_ZTSSt16_Sp_counted_baseILN9__gnu_cxx12_Lock_policyE2EE</code></td></tr>
+<tr><td>5,210</td><td><code>_ZTISt11_Mutex_baseILN9__gnu_cxx12_Lock_policyE2EE</code></td></tr>
+<tr><td>5,119</td><td><code>_ZZNSt19_Sp_make_shared_tag5_S_tiEvE5__tag</code></td></tr>
+<tr><td>5,081</td><td><code>_ZTSSt19_Sp_make_shared_tag</code></td></tr>
+<tr><td>4,226</td><td><code>_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE15_M_replace_coldEPcmPKcmm</code></td></tr>
+<tr><td>3,976</td><td><code>_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE9_M_mutateEmmPKcm</code></td></tr>
+<tr><td>3,971</td><td><code>_init@@Qt_6</code></td></tr>
+<tr><td>3,971</td><td><code>_fini@@Qt_6</code></td></tr>
+<tr><td>3,589</td><td><code>_ZZN9QMetaType23registerMutableViewImplI5QListIiE9QIterableI13QMetaSequenceEEEbSt8functionIFbPvS7_EES_S_E10unregister@@Qt_6</code></td></tr>
+<tr><td>3,589</td><td><code>_ZTIZN9QMetaType17registerConverterI5QListIiE9QIterableI13QMetaSequenceEN9QtPrivate33QSequentialIterableConvertFunctorIS2_EEEEbT1_EUlPKvPvE_@@Qt_6</code></td></tr>
+<tr><td>3,589</td><td><code>_ZZN9QMetaType21registerConverterImplI5QListIiE9QIterableI13QMetaSequenceEEEbSt8functionIFbPKvPvEES_S_E10unregister@@Qt_6</code></td></tr></tbody></table>
+</section>
 
 </main>
 <footer>

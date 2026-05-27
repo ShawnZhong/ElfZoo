@@ -1126,6 +1126,169 @@ def build_depgraph(g: dict, sv: dict) -> str:
         )
     out.append(section("Versioned-symbol mismatches", body))
 
+    # ─── NEEDED uniqueness ──────────────────────────────────────────────
+    nd = g.get("needed_duplication") or {}
+    intra = nd.get("intra") or {}
+    n_intra = intra.get("n_files", 0)
+    if n_intra == 0:
+        body = (
+            '<p><strong>0 of '
+            f'{_fmt(n_consumers)}</strong> consumers list the same '
+            'SONAME twice in a single <code>DT_NEEDED</code> array. '
+            'The gABI says nothing about uniqueness — '
+            '<em>"the dynamic array may contain multiple entries '
+            'with this type; their relative order is significant, '
+            'though it is unspecified how the dynamic linker '
+            'processes them"</em> (gabi 07 § Dynamic Section) — '
+            'yet every linker in the corpus dedupes producers, '
+            'every consumer is dup-free, and <code>eu-elflint</code> '
+            'flags the duplicate-NEEDED template (which fires zero '
+            'times). The spec is descriptively too weak here: '
+            'tightening to <em>pairwise-distinct sonames</em> '
+            'within one DT array would cost zero compatibility '
+            'and would let a loader prove a witness at parse time '
+            'instead of leaving the case to runtime.</p>'
+        )
+    else:
+        rows = []
+        for d in intra.get("top", [])[:30]:
+            dups = ", ".join(
+                f'<code>{_esc(k)}</code>×{v}'
+                for k, v in (d.get("dups") or {}).items()
+            )
+            rows.append([
+                f'<code>{_esc(d["path"])}</code>',
+                dups,
+            ])
+        body = (
+            f'<p><strong>{_fmt(n_intra)} of '
+            f'{_fmt(n_consumers)}</strong> consumers list the same '
+            'SONAME twice in one <code>DT_NEEDED</code> array.</p>'
+            + table(["consumer", "duplicates"], rows)
+        )
+    out.append(section("NEEDED uniqueness (intra-array)", body))
+
+    # ─── Transitive-closure duplication ─────────────────────────────────
+    trans = nd.get("transitive") or {}
+    n_diamond = trans.get("n_diamond", 0)
+    n_tree = trans.get("n_tree", 0)
+    n_trans_total = n_diamond + n_tree
+    total_extra = trans.get("total_extra", 0)
+    pct_diamond = (100 * n_diamond / n_trans_total
+                   if n_trans_total else 0.0)
+
+    hist = trans.get("extra_histogram") or {}
+    if hist:
+        order = sorted(hist.keys(),
+                       key=lambda k: (len(k), k))
+        h_labels = order
+        h_vals = [int(hist[k]) for k in order]
+        hist_chart = chart_bar(
+            "g_trans_hist", h_labels, h_vals,
+            title="consumers grouped by #redundant edges",
+            height=260,
+        )
+    else:
+        hist_chart = ""
+
+    rows_abs = [[
+        _fmt(d["extra"]), _fmt(d["nodes"]), _fmt(d["edges"]),
+        f"{100*d['ratio']:.1f}%",
+        f'<code>{_esc(d["path"])}</code>',
+    ] for d in trans.get("top_absolute", [])[:25]]
+    rows_ratio = [[
+        f"{100*d['ratio']:.1f}%",
+        _fmt(d["extra"]), _fmt(d["nodes"]), _fmt(d["edges"]),
+        f'<code>{_esc(d["path"])}</code>',
+    ] for d in trans.get("top_ratio", [])[:25]]
+
+    body = (
+        '<p><strong>' + _fmt(n_diamond) + ' of '
+        + _fmt(n_trans_total) + '</strong> consumers ('
+        + f'{pct_diamond:.1f}%) have at least one '
+        '<em>diamond</em> in their resolved closure — i.e. a DSO '
+        'reachable via two or more distinct <code>NEEDED</code> '
+        'edges. Across the corpus that is '
+        + _fmt(total_extra)
+        + ' redundant edges that a naive tree-walk would re-visit. '
+        'Unlike intra-NEEDED duplication, this redundancy is '
+        '<strong>load-bearing</strong>: glibc rtld '
+        '(<code>elf/dl-deps.c::_dl_map_object_deps</code>) and '
+        'musl ldso (<code>ldso/dynlink.c::load_deps</code>) both '
+        'build the link map by FIFO BFS over <code>DT_NEEDED</code> '
+        'in array order, first-seen wins. Adding or removing an '
+        'edge promotes a DSO one BFS level earlier or later, '
+        'which directly changes which definition wins on '
+        'overlapping symbols (see next section). gABI codifies '
+        'neither the BFS algorithm nor the first-seen rule, '
+        'but every loader implements both.</p>'
+        + hist_chart
+        + '<h3>Top 25 by absolute redundant edges</h3>'
+        + table(["extra", "nodes", "edges", "ratio", "file"],
+                rows_abs)
+        + '<h3>Top 25 by redundancy ratio (closures ≥ 50 edges)</h3>'
+        + table(["ratio", "extra", "nodes", "edges", "file"],
+                rows_ratio)
+    )
+    out.append(section("Transitive-closure duplication "
+                       "(diamond NEEDED edges)", body))
+
+    # ─── Symbol shadowing ───────────────────────────────────────────────
+    ss = g.get("symbol_shadowing") or {}
+    n_ex = ss.get("n_examined", 0)
+    n_sh = ss.get("n_with_shadow", 0)
+    n_pairs = ss.get("total_shadow_pairs", 0)
+    pct_shadow = (100 * n_sh / n_ex) if n_ex else 0.0
+
+    rows_consumers = [[
+        _fmt(d["n_shadow"]), _fmt(d["n_direct"]),
+        _fmt(d["n_transitive"]),
+        f'<code>{_esc(d["path"])}</code>',
+    ] for d in ss.get("top_consumers", [])[:25]]
+    rows_syms = [[
+        _fmt(d["n_consumers_shadowed"]),
+        f'<code>{_esc(d["symbol"])}</code>',
+    ] for d in ss.get("top_symbols", [])[:25]]
+
+    body = (
+        '<p><strong>' + _fmt(n_sh) + ' of ' + _fmt(n_ex)
+        + '</strong> consumers (' + f'{pct_shadow:.1f}%' + ') with '
+        'both direct and transitive-only providers in their closure '
+        'export at least one symbol from <em>both</em> sides. '
+        'Under the BFS first-seen rule the direct provider always '
+        'wins; the transitive definition is reachable only via '
+        '<code>dlsym(handle, …)</code> or <code>RTLD_NEXT</code>. '
+        'Across the corpus we count '
+        + _fmt(n_pairs) + ' total shadowed-symbol pairs.</p>'
+        '<p>This is exactly the zone where the (unwritten) BFS '
+        'link-map rule has observable static consequences. '
+        'Two real-world coping strategies are visible in the '
+        'corpus: <strong>GHC</strong> binaries re-<code>NEEDED</code> '
+        'every transitively-used Hackage package directly, driving '
+        'shadow counts to <strong>zero</strong>; <strong>Qt/KDE '
+        'plugins</strong> emit one explicit <code>NEEDED</code> '
+        'per transitively-used Qt module so the host '
+        '<code>dlopen</code>\u2019s scope is deterministic. Both '
+        'patterns trade DT_NEEDED list size for resolution '
+        'determinism.</p>'
+        '<p>Common shadowed-symbol families seen in the top-25 '
+        'symbol table: libc startup hooks '
+        '(<code>_init</code>, <code>_fini</code>) — defined by '
+        'every DSO but resolved per-link-map via DT_INIT/DT_FINI, '
+        'not via global scope — and the GNU gettext shim symbols '
+        '(<code>gettext</code>, <code>dgettext</code>, '
+        '<code>bindtextdomain</code>, …) which appear both in '
+        '<code>libc.musl-x86_64.so.1</code> and in '
+        '<code>libintl</code>-style shims.</p>'
+        + '<h3>Top 25 consumers by #shadowed symbols</h3>'
+        + table(["#shadow", "#direct", "#transitive", "file"],
+                rows_consumers)
+        + '<h3>Top 25 most-shadowed symbols (across consumers)</h3>'
+        + table(["#consumers", "symbol"], rows_syms)
+    )
+    out.append(section(
+        "Symbol shadowing — direct dep vs transitive dep", body))
+
     return "".join(out)
 
 
@@ -1281,6 +1444,7 @@ def main() -> int:
             "top_in_degree", "top_out_degree", "biggest_closure",
             "conflicts", "external", "cycles", "version_mismatches",
             "soname_use",
+            "needed_duplication", "symbol_shadowing",
         )
         g_slim = {k: g[k] for k in slim_keys if k in g}
     (SITE / "data.json").write_text(json.dumps(
