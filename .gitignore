@@ -5,6 +5,7 @@ corpus/analysis/
 corpus/sysroots/
 corpus/*.sqlite
 corpus/*.sqlite-*
+corpus/survey.json
 
 # Test artifacts
 results/
