@@ -34,7 +34,7 @@ ElfZoo/
 ```
 
 The elfutils source oracle lives in the umbrella checkout at
-`../third_party/impl/elfutils/`.
+`../third_party/impl-lib/elfutils/`.
 
 ## Corpus
 
@@ -128,7 +128,7 @@ plan.
 
 ## Third-party
 
-`../third_party/impl/elfutils/` is the shared LeanLoad umbrella
+`../third_party/impl-lib/elfutils/` is the shared LeanLoad umbrella
 submodule for elfutils. It is referenced as the source-of-truth for
 both the in-Python anomaly checks and the linter oracle.
 
@@ -137,5 +137,5 @@ Clone with submodules, or initialise after the fact:
 ```bash
 git clone --recurse-submodules https://github.com/LeanLoad/LeanLoad.git
 # or
-git submodule update --init ElfZoo third_party/impl/elfutils
+git submodule update --init ElfZoo third_party/impl-lib/elfutils
 ```
