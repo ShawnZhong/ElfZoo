@@ -30,9 +30,11 @@ ElfZoo/
 │   └── dep_graph.json         # corpus-wide DT_NEEDED graph
 ├── scripts/                   # all tooling (bash + python)
 ├── audit/                    # audit.c LD_AUDIT library
-├── third_party/elfutils/     # vendored elfutils source (submodule, ref oracle)
 └── docs/                     # generated static HTML site (committed; served by GitHub Pages)
 ```
+
+The elfutils source oracle lives in the umbrella checkout at
+`../third_party/loader/elfutils/`.
 
 ## Corpus
 
@@ -126,16 +128,14 @@ plan.
 
 ## Third-party
 
-`third_party/elfutils/` is a git submodule pinned to the
-`elfutils-0.190` tag — the version `eu-elflint` is built from on
-Ubuntu / Debian stable. It is referenced as the source-of-truth
-for both the in-Python anomaly checks and the linter oracle.
+`../third_party/loader/elfutils/` is the shared LeanLoad umbrella
+submodule for elfutils. It is referenced as the source-of-truth for
+both the in-Python anomaly checks and the linter oracle.
 
 Clone with submodules, or initialise after the fact:
 
 ```bash
-git clone --recurse-submodules https://github.com/ShawnZhong/ElfZoo.git
+git clone --recurse-submodules https://github.com/LeanLoad/LeanLoad.git
 # or
-git submodule update --init --recursive
+git submodule update --init ElfZoo third_party/loader/elfutils
 ```
-

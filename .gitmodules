@@ -1,3 +1,0 @@
-[submodule "third_party/elfutils"]
-	path = third_party/elfutils
-	url = https://sourceware.org/git/elfutils.git

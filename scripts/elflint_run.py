@@ -5,7 +5,7 @@ elfutils' elflint is a far more thorough conformance checker than we
 care to (re-)implement in Python — it covers section-header consistency,
 hash / gnu-hash bucket validity, version-table walks, group sections,
 note format parsing, per-arch quirks, etc. (~4900 lines of C in
-third_party/elfutils/src/elflint.c). We use it as a second-opinion
+../third_party/loader/elfutils/src/elflint.c). We use it as a second-opinion
 oracle next to scripts/survey.py:
 
   - per-file output: corpus/elflint/<repo>/<pkg>/<rel>.txt
