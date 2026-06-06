@@ -18,20 +18,27 @@ and libraries, is a loader we can trust.
 
 ```
 ElfZoo/
-├── corpus/                    # bulk data, gitignored
-│   ├── mirror/                # downloaded .apk files (~59 GB)
-│   ├── unpacked/<repo>/<pkg>/ # per-package extraction trees
-│   ├── analysis/<repo>/<pkg>/ # per-ELF llvm-readobj JSON dumps
-│   ├── sysroots/<pkg>/        # per-package sysroots (built on demand)
-│   ├── audit/<repo>/<pkg>/    # LD_AUDIT runtime traces (JSONL)
-│   ├── elflint/<repo>/<pkg>/  # per-ELF eu-elflint text cache
-│   ├── survey.json            # aggregated static survey
-│   ├── elflint_summary.json   # aggregated elflint findings
-│   └── dep_graph.json         # corpus-wide DT_NEEDED graph
-├── scripts/                   # all tooling (bash + python)
-├── audit/                    # audit.c LD_AUDIT library
+├── src/                      # Rust CLI (`elfzoo`)
+├── scripts/                  # legacy Python/shell tooling
+├── audit/                    # LD_AUDIT prototype
 └── docs/                     # generated static HTML site (committed; served by GitHub Pages)
 ```
+
+Generated data lives under `results/` and is gitignored:
+
+```
+results/
+├── apks/<repo>/                         # downloaded .apk files + APKINDEX
+├── extracted/<repo>/<pkg>/              # per-package extraction trees
+├── descriptions/<repo>/<pkg>/<rel>.json # single-ELF structural analysis
+├── resolutions/<repo>/<pkg>/<rel>.json  # executable loader-resolution analysis
+└── oracle/
+    └── elflint/<repo>/<pkg>/<rel>.json  # eu-elflint oracle result
+```
+
+The output tree mirrors package paths. A result file's existence means that
+result is available; JSON writes use temp-file + atomic rename, and every JSON
+schema carries a `schema_version` so stale outputs can be regenerated.
 
 The elfutils source oracle lives in the umbrella checkout at
 `../third_party/impl-tool/elfutils/`.
@@ -46,45 +53,40 @@ The elfutils source oracle lives in the umbrella checkout at
 
 Source: `https://dl-cdn.alpinelinux.org/alpine/v3.23/{main,community}/x86_64/`.
 
-Every ELF is sorted into exactly one of five buckets by
-`scripts/survey.py::_classify()`. The first three columns are
-load-bearing for the loader-spec project; the other two are kept for
-transparency.
+The Rust tooling classifies ELFs from file structure rather than path. The
+load-bearing buckets for loader work are dynamic programs, static programs,
+DSOs, and other x86-64 load images; non-x86 files, relocatables, cores, and
+malformed images remain visible but are filtered out before runtime/program
+analysis by default.
 
-| bucket | count | what it is |
-|---|---|---|
-| **loadable** | 52,945 | ET_EXEC / ET_DYN targeting x86_64 — real loader inputs |
-| debuginfo | 5,344 | `/usr/lib/debug/**` + `.debug` / `.dbg` files (PT_DYNAMIC empty) |
-| relocatable | 3,807 | ET_REL — mostly `avr-libc`, cross-elf-binutils, kernel sources |
-| cross_arch | 85 | ET_EXEC/DYN but `e_machine != EM_X86_64` (qemu firmware, etc.) |
-| other | 1,769 | EM_NONE (Guile `.go` bytecode), bogus `e_machine` values |
+| bucket | what it is |
+|---|---|
+| `dynamic_program` | `ET_EXEC` / PIE-like `ET_DYN` with `PT_INTERP` + `PT_DYNAMIC` |
+| `static_program` | executable-looking load image with no `PT_INTERP` and `e_entry` inside executable `PT_LOAD` |
+| `dso` | `ET_DYN` + `PT_DYNAMIC` with no interpreter |
+| `load_image` | x86-64 `ET_EXEC` / `ET_DYN` with `PT_LOAD`, but no stronger role |
+| `wrong_format` / `wrong_machine` / `relocatable` / `core` / `malformed_image` | structurally excluded from x86 loader analysis |
 
 ## Quickstart
 
 ```bash
-# 1. Mirror + unpack the corpus (~59 GB download, ~30 min on a fast link)
-scripts/fetch.sh
-scripts/unpack.sh
+# 1. Mirror + extract the corpus (~59 GB download)
+./fetch.sh
+./extract.sh
 
-# 2. Reference static dump: one llvm-readobj JSON per ELF (~150 s, ~34 GB)
-scripts/dump.py --all
+# 2. Primary structural analysis: describe each ELF object
+./describe.sh
 
-# 3. Static-survey aggregate (~2 min, writes corpus/survey.json)
-scripts/survey.py --jobs 40
+# 3. Loader-input analysis: resolve each executable entrance
+./resolve.sh
 
-# 4. eu-elflint second opinion (~30 s, writes corpus/elflint_summary.json)
-scripts/elflint_run.py --jobs 40
-
-# 5. Corpus-wide DT_NEEDED graph (~2 min, writes corpus/dep_graph.json)
-scripts/dep_graph.py --jobs 40
-
-# 6. Runtime LD_AUDIT traces (~5 min for repo=main; ~80 GB of JSONL)
-scripts/audit_run.py --all --repo main --jobs 40
-
-# 7. Build the static analysis website (output: docs/)
-scripts/build_site.py
-python3 -m http.server --directory docs 8000
+# 4. eu-elflint oracle, also JSON per ELF
+./elflint.sh
 ```
+
+The legacy `scripts/` directory is kept for now because the Rust CLI does not
+yet replace the old survey, dependency-graph, site-generation, sysroot, and
+runtime tracing helpers.
 
 Sample-file lists shown in the survey and on the site are
 uniform-random and **deterministic** — `blake2b(kind, path, idx)` drawn
