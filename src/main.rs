@@ -1,8 +1,4 @@
-mod cmd_describe;
-mod cmd_elflint;
-mod cmd_extract;
-mod cmd_fetch;
-mod cmd_resolve;
+mod cmd;
 mod elf;
 mod output;
 mod paths;
@@ -32,19 +28,22 @@ struct Cli {
 #[derive(Subcommand)]
 enum Command {
     #[command(about = "Mirror Alpine APKs into results/apks")]
-    Fetch(cmd_fetch::Args),
+    Fetch(cmd::fetch::Args),
 
-    #[command(about = "Extract APK contents into results/extracted")]
-    Extract(cmd_extract::Args),
+    #[command(about = "Extract ELF files and symlinks into results/extracted")]
+    Extract(cmd::extract::Args),
 
-    #[command(about = "Describe each ELF object in isolation")]
-    Describe(cmd_describe::Args),
+    #[command(about = "Analyze APK package metadata")]
+    AnalyzePackages(cmd::analyze_packages::Args),
 
-    #[command(about = "Resolve each executable as a loader input")]
-    Resolve(cmd_resolve::Args),
+    #[command(about = "Analyze each ELF object in isolation")]
+    AnalyzeElfs(cmd::analyze_elfs::Args),
+
+    #[command(about = "Analyze each executable program as a loader input")]
+    AnalyzePrograms(cmd::analyze_programs::Args),
 
     #[command(name = "elflint", about = "Run eu-elflint and write JSON results")]
-    Elflint(cmd_elflint::Args),
+    Elflint(cmd::elflint::Args),
 }
 
 fn main() -> Result<()> {
@@ -52,10 +51,11 @@ fn main() -> Result<()> {
     let results = paths::Results::new(cli.results);
 
     match cli.command {
-        Command::Fetch(args) => cmd_fetch::run(&results, args),
-        Command::Extract(args) => cmd_extract::run(&results, args),
-        Command::Describe(args) => cmd_describe::run(&results, args),
-        Command::Resolve(args) => cmd_resolve::run(&results, args),
-        Command::Elflint(args) => cmd_elflint::run(&results, args),
+        Command::Fetch(args) => cmd::fetch::run(&results, args),
+        Command::Extract(args) => cmd::extract::run(&results, args),
+        Command::AnalyzePackages(args) => cmd::analyze_packages::run(&results, args),
+        Command::AnalyzeElfs(args) => cmd::analyze_elfs::run(&results, args),
+        Command::AnalyzePrograms(args) => cmd::analyze_programs::run(&results, args),
+        Command::Elflint(args) => cmd::elflint::run(&results, args),
     }
 }

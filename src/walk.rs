@@ -12,9 +12,6 @@ pub fn files(root: &Path) -> Result<Vec<PathBuf>> {
     let mut out = Vec::new();
     for entry in WalkDir::new(root).follow_links(false) {
         let entry = entry.with_context(|| format!("walking {}", root.display()))?;
-        if entry.file_type().is_dir() {
-            continue;
-        }
         if fs::metadata(entry.path()).is_ok_and(|metadata| metadata.is_file()) {
             out.push(entry.into_path());
         }

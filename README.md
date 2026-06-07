@@ -29,16 +29,19 @@ Generated data lives under `results/` and is gitignored:
 ```
 results/
 ├── apks/<repo>/                         # downloaded .apk files + APKINDEX
-├── extracted/<repo>/<pkg>/              # per-package extraction trees
-├── descriptions/<repo>/<pkg>/<rel>.json # single-ELF structural analysis
-├── resolutions/<repo>/<pkg>/<rel>.json  # executable loader-resolution analysis
+├── extracted/<repo>/<pkg>/              # ELF-only per-package extraction trees
+├── packages/<repo>/<pkg>.json           # package metadata and shallow ELF counts
+├── elfs/<repo>/<pkg>/<rel>.json         # single-ELF structural analysis
+├── programs/<repo>/<pkg>/<rel>.json     # executable program analysis
 └── oracle/
     └── elflint/<repo>/<pkg>/<rel>.json  # eu-elflint oracle result
 ```
 
-The output tree mirrors package paths. A result file's existence means that
-result is available; JSON writes use temp-file + atomic rename, and every JSON
-schema carries a `schema_version` so stale outputs can be regenerated.
+The extracted tree mirrors package paths but only materializes regular files
+whose contents start with ELF magic, plus all package symlinks normalized under
+the package extraction root. A result file's existence means that result is
+available; JSON writes use temp-file + atomic rename, and every JSON schema
+carries a `schema_version` so stale outputs can be regenerated.
 
 The elfutils source oracle lives in the umbrella checkout at
 `../third_party/impl-tool/elfutils/`.
@@ -74,13 +77,16 @@ analysis by default.
 ./fetch.sh
 ./extract.sh
 
-# 2. Primary structural analysis: describe each ELF object
-./describe.sh
+# 2. Package metadata, shallow ELF counts, and packages/index.html
+./analyze-packages.sh
 
-# 3. Loader-input analysis: resolve each executable entrance
-./resolve.sh
+# 3. Primary structural analysis: analyze each ELF object
+./analyze-elfs.sh
 
-# 4. eu-elflint oracle, also JSON per ELF
+# 4. Loader-input analysis: analyze each executable program
+./analyze-programs.sh
+
+# 5. eu-elflint oracle, also JSON per ELF
 ./elflint.sh
 ```
 

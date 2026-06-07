@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")"
-exec cargo run --quiet -- describe "$@"
+exec cargo run --release --quiet -- analyze-programs "$@"

@@ -20,12 +20,16 @@ impl Results {
         self.root.join("extracted")
     }
 
-    pub fn descriptions(&self) -> PathBuf {
-        self.root.join("descriptions")
+    pub fn packages(&self) -> PathBuf {
+        self.root.join("packages")
     }
 
-    pub fn resolutions(&self) -> PathBuf {
-        self.root.join("resolutions")
+    pub fn elfs(&self) -> PathBuf {
+        self.root.join("elfs")
+    }
+
+    pub fn programs(&self) -> PathBuf {
+        self.root.join("programs")
     }
 
     pub fn oracle_elflint(&self) -> PathBuf {
